@@ -2504,18 +2504,13 @@ body {
 ===================================================== */
 
 .sheet {
-
   position: relative;
-
   width: 210mm;
-  min-height: 297mm;
-
+  height: 297mm;
   overflow: hidden;
-
-  padding: 13mm;
-
-  page-break-after: always;
-
+  padding: 10mm;
+  page-break-after: auto;
+  break-after: auto;
 }
 
 
@@ -2537,6 +2532,7 @@ body {
   object-fit: cover;
 
   object-position: center top;
+  opacity: 0.72;
 
   z-index: 0;
 
@@ -2553,14 +2549,14 @@ body {
 
   z-index: 2;
 
-  min-height: 271mm;
+  min-height: 277mm;
 
-  padding: 12mm;
+padding: 13mm;
 
-  border-radius: 27px;
+border-radius: 30px;
 
-  background:
-    rgba(255,255,255,.78);
+background:
+  rgba(255,255,255,.88);
 
   border:
     1px solid
@@ -2617,7 +2613,7 @@ body {
 
   color: #91a9ad;
 
-  font-size: 13px;
+  font-size: 15px;
 
   margin-bottom: 3mm;
 
@@ -2642,7 +2638,7 @@ h1 {
 
   color: #8b7355;
 
-  font-size: 28px;
+  font-size: 32px;
 
   line-height: 1.35;
 
@@ -2741,7 +2737,7 @@ h2 {
 
   color: #7c979b;
 
-  font-size: 17px;
+  font-size: 19px;
 
   font-weight: 600;
 
@@ -2756,7 +2752,7 @@ p {
 
   margin: 2mm 0;
 
-  font-size: 13px;
+  font-size: 15px;
 
   line-height: 1.7;
 
@@ -2785,7 +2781,7 @@ li {
 
   margin: 2.5mm 0;
 
-  font-size: 13px;
+  font-size: 15px;
 
   line-height: 1.65;
 
