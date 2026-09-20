@@ -2058,47 +2058,12 @@ function renderProfile(state) {
            RECIPE OVERVIEW
       ====================================== -->
 
-      <section class="profile-recipe-card">
-
-        <div class="profile-recipe-art">
-
-          <div class="profile-flower flower-one">
-            ✿
-          </div>
-
-          <div class="profile-book">
-            📚
-          </div>
-
-          <div class="profile-cat">
-            🐈
-          </div>
-
-          <div class="profile-flower flower-two">
-            ✿
-          </div>
-
-        </div>
-
-
-        <div class="profile-recipe-info">
-
-          <strong>
-            ${recipeCount}
-          </strong>
-
-          <span>
-            道食谱
-          </span>
-
-          <p>
-            用喜欢的食物，<br />
-            过喜欢的生活 ♡
-          </p>
-
-        </div>
-
-      </section>
+      <section class="profile-recipe-card profile-recipe-image-card">
+  <img
+    src="./assets/profile-recipe-card.jpg"
+    alt="芳芳的小厨房日记"
+  />
+</section>
 
 
       <!-- =====================================
