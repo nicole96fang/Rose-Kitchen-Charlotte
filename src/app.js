@@ -133,30 +133,123 @@ function render() {
 // ==================================================
 
 function renderHome(state) {
-  const cats =
-    store.categories;
+  const cats = store.categories;
+
+  const featuredIds = [
+    "soup",
+    "noodle",
+    "western-dessert",
+    "vegetable"
+  ];
+
+  const featured = featuredIds
+    .map(id =>
+      cats.find(item => item.id === id)
+    )
+    .filter(Boolean);
+
+  const recipeCount =
+    recipes().length;
+
+  const favoriteCount =
+    recipes().filter(
+      item => item.favorite
+    ).length;
+
+  const shoppingCount =
+    (state.shoppingLists || [])
+      .reduce(
+        (total, list) =>
+          total +
+          (list.items || []).length,
+        0
+      );
+
+  const profile =
+    state.profile || {};
+
+  const avatarHTML =
+    profile.avatar
+      ? `
+        <img
+          src="${profile.avatar}"
+          alt=""
+        />
+      `
+      : `
+        <span>🌸</span>
+      `;
 
   app.innerHTML = `
     <div class="page home-page">
 
-      <section class="hero-card">
-        <div class="hero-flower flower-one">✿</div>
-        <div class="hero-flower flower-two">❀</div>
+      <!-- TOP HEADER -->
+      <header class="home-topbar">
 
-        <p class="hero-small">
-          Hi，Lovely！
+        <button
+          class="home-avatar"
+          id="home-avatar"
+          aria-label="我的"
+        >
+          ${avatarHTML}
+        </button>
+
+        <div class="home-brand">
+
+          <strong>
+            My Kitchen Rose
+          </strong>
+
+          <small>
+            RECIPE JOURNAL
+          </small>
+
+        </div>
+
+        <div class="home-tools">
+
+          <button
+            class="home-tool"
+            id="home-search-button"
+            aria-label="搜索"
+          >
+            ⌕
+          </button>
+
+          <button
+            class="home-tool"
+            id="home-settings"
+            aria-label="设置"
+          >
+            ⚙
+          </button>
+
+        </div>
+
+      </header>
+
+
+      <!-- INTRO -->
+      <section class="home-intro">
+
+        <p>
+          用喜欢的食物，
         </p>
 
         <h1>
-          厨房是我的治愈地 ♡
+          过喜欢的生活 ♡
         </h1>
 
-        <p>
-          用喜欢的食物，过喜欢的生活
-        </p>
+        <span>
+          MY LITTLE KITCHEN DIARY
+        </span>
+
       </section>
 
-      <div class="search-box">
+
+      <!-- SEARCH -->
+      <div class="search-box home-search">
+
         <span>⌕</span>
 
         <input
@@ -166,19 +259,121 @@ function renderHome(state) {
             searchText
           )}"
         />
+
       </div>
+
 
       ${
         searchText.trim()
           ? searchResultHTML()
+
           : `
-            <section class="section-block">
-              <div class="section-title">
-                <h2>我的分类</h2>
-                <span>17 个分类 ♡</span>
+
+            <!-- FEATURED -->
+            <section class="featured-strip">
+
+              ${featured
+                .map(
+                  item => `
+                    <button
+                      class="featured-card"
+                      data-category="${item.id}"
+                    >
+
+                      <div class="featured-image">
+
+                        <img
+                          src="${item.icon}"
+                          alt="${escapeHTML(
+                            item.name
+                          )}"
+                        />
+
+                      </div>
+
+                      <span>
+                        ${escapeHTML(
+                          item.name
+                        )}
+                      </span>
+
+                    </button>
+                  `
+                )
+                .join("")}
+
+            </section>
+
+
+            <!-- STATS -->
+            <section class="home-stats">
+
+              <div>
+                <strong>
+                  ${cats.length}
+                </strong>
+
+                <span>
+                  分类
+                </span>
               </div>
 
+
+              <div>
+                <strong>
+                  ${recipeCount}
+                </strong>
+
+                <span>
+                  食谱
+                </span>
+              </div>
+
+
+              <div>
+                <strong>
+                  ${favoriteCount}
+                </strong>
+
+                <span>
+                  收藏
+                </span>
+              </div>
+
+
+              <div>
+                <strong>
+                  ${shoppingCount}
+                </strong>
+
+                <span>
+                  购买清单
+                </span>
+              </div>
+
+            </section>
+
+
+            <!-- ALL CATEGORIES -->
+            <section
+              class="section-block home-category-section"
+            >
+
+              <div class="section-title">
+
+                <h2>
+                  全部分类
+                </h2>
+
+                <span>
+                  一起收藏美味的回忆 ♡
+                </span>
+
+              </div>
+
+
               <div class="category-grid">
+
                 ${cats
                   .map(
                     item => `
@@ -186,34 +381,57 @@ function renderHome(state) {
                         class="category-card"
                         data-category="${item.id}"
                       >
+
                         <div class="category-image">
+
                           <img
                             src="${item.icon}"
                             alt="${escapeHTML(
                               item.name
                             )}"
                           />
+
                         </div>
 
-                        <span>
-                          ${escapeHTML(
-                            item.name
-                          )}
-                        </span>
 
-                        <small>
-                          ${
-                            categoryRecipes(
-                              item.id
-                            ).length
-                          } 道食谱
-                        </small>
+                        <div
+                          class="category-card-text"
+                        >
+
+                          <span>
+                            ${escapeHTML(
+                              item.name
+                            )}
+                          </span>
+
+                          <small>
+                            ${
+                              categoryRecipes(
+                                item.id
+                              ).length
+                            } 道食谱
+                          </small>
+
+                        </div>
+
                       </button>
                     `
                   )
                   .join("")}
+
               </div>
+
+
+              <button
+                class="home-add-button"
+                id="home-add-recipe"
+              >
+                <span>＋</span>
+                新增食谱
+              </button>
+
             </section>
+
           `
       }
 
@@ -222,7 +440,64 @@ function renderHome(state) {
     ${bottomNav("home")}
   `;
 
+
   bindHome();
+
+
+  const settings =
+    $("#home-settings");
+
+  if (settings) {
+    settings.onclick =
+      () => showPage("profile");
+  }
+
+
+  const avatar =
+    $("#home-avatar");
+
+  if (avatar) {
+    avatar.onclick =
+      () => showPage("profile");
+  }
+
+
+  const searchButton =
+    $("#home-search-button");
+
+  if (searchButton) {
+
+    searchButton.onclick =
+      () => {
+
+        const input =
+          $("#global-search");
+
+        if (input) {
+
+          input.focus();
+
+          input.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+          });
+
+        }
+
+      };
+
+  }
+
+
+  const addButton =
+    $("#home-add-recipe");
+
+  if (addButton) {
+
+    addButton.onclick =
+      () => newRecipe("other");
+
+  }
 }
 
 function searchResultHTML() {
@@ -296,7 +571,9 @@ function searchResultHTML() {
 }
 
 function bindHome() {
-  $$(".category-card").forEach(
+  $$(
+  ".category-card, .featured-card"
+).forEach(
     button => {
       button.onclick = () =>
         showCategory(
