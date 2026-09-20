@@ -2401,31 +2401,88 @@ function bottomNav(active = "") {
 function printRecipe(recipe) {
   const cat = category(recipe.categoryId);
 
-  const printWindow = window.open("", "_blank");
+  // ==================================================
+  // PHOTO DATA
+  // ==================================================
+
+  const photos = recipe.photos || [];
+
+  const coverPhoto =
+    recipe.cover ||
+    photos[0] ||
+    "";
+
+  // 找出封面照片在 photos 里的位置
+  const coverIndex = coverPhoto
+    ? photos.findIndex(
+        photo => photo === coverPhoto
+      )
+    : -1;
+
+  // 制作记录不再重复显示封面
+  const galleryPhotos =
+    coverIndex >= 0
+      ? photos.filter(
+          (_, index) =>
+            index !== coverIndex
+        )
+      : photos;
+
+
+  // ==================================================
+  // OPEN PRINT WINDOW
+  // ==================================================
+
+  const printWindow =
+    window.open(
+      "",
+      "_blank"
+    );
 
   if (!printWindow) {
-    alert("请允许浏览器打开打印页面");
+    alert(
+      "请允许浏览器打开打印页面"
+    );
+
     return;
   }
 
-  // 使用 GitHub Pages 当前网站地址，避免字体/图片路径错误
-  const baseURL = window.location.href;
 
-  const backgroundURL = new URL(
-    "./assets/app-background.jpg",
-    baseURL
-  ).href;
+  // ==================================================
+  // IMPORTANT:
+  // GitHub Pages 当前网站地址
+  // 确保 background / font 不会消失
+  // ==================================================
 
-  const fontURL = new URL(
-    "./assets/fonts/泥木扭扭体NeedMood NiuNiu.ttf",
-    baseURL
-  ).href;
+  const baseURL =
+    window.location.href;
+
+
+  const backgroundURL =
+    new URL(
+      "./assets/app-background.jpg",
+      baseURL
+    ).href;
+
+
+  const fontURL =
+    new URL(
+      "./assets/fonts/泥木扭扭体NeedMood NiuNiu.ttf",
+      baseURL
+    ).href;
+
+
+  // ==================================================
+  // PRINT HTML
+  // ==================================================
 
   printWindow.document.write(`
 <!doctype html>
+
 <html lang="zh-CN">
 
 <head>
+
 <meta charset="UTF-8">
 
 <meta
@@ -2434,36 +2491,52 @@ function printRecipe(recipe) {
 />
 
 <title>
-  ${escapeHTML(recipe.title || "我的食谱")}
+  ${escapeHTML(
+    recipe.title ||
+    "我的食谱"
+  )}
 </title>
+
 
 <style>
 
+/* =====================================================
+   CUSTOM FONT
+   保留你 App 原本使用的字体
+===================================================== */
+
 @font-face {
-  font-family: "NeedMoodNiuNiu";
+
+  font-family:
+    "NeedMoodNiuNiu";
 
   src:
     url("${fontURL}")
     format("truetype");
 
-  font-style: normal;
-  font-weight: 100 900;
+  font-style:
+    normal;
 
-  font-display: block;
+  font-weight:
+    100 900;
+
+  font-display:
+    block;
 }
 
 
 /* =====================================================
    GLOBAL FONT
-   整个打印页面全部使用泥木扭扭体
 ===================================================== */
 
 html,
 body,
 * {
+
   font-family:
     "NeedMoodNiuNiu",
     sans-serif !important;
+
 }
 
 
@@ -2472,82 +2545,146 @@ body,
 ===================================================== */
 
 @page {
-  size: 210mm 297mm;
-  margin: 0;
+
+  size:
+    210mm
+    297mm;
+
+  margin:
+    0;
+
 }
 
 
+/* =====================================================
+   GLOBAL
+===================================================== */
+
 * {
-  box-sizing: border-box;
+
+  box-sizing:
+    border-box;
+
 }
 
 
 html,
 body {
-  margin: 0;
-  padding: 0;
 
-  background: #dcecef;
+  margin:
+    0;
 
-  -webkit-print-color-adjust: exact !important;
-  print-color-adjust: exact !important;
+  padding:
+    0;
+
+  background:
+    #dcecef;
+
+  -webkit-print-color-adjust:
+    exact !important;
+
+  print-color-adjust:
+    exact !important;
+
 }
 
 
 body {
-  color: #536b71;
+
+  color:
+    #536b71;
+
 }
 
 
 /* =====================================================
    A4 SHEET
+
+   IMPORTANT:
+   这里故意使用 296.8mm
+   不使用 297mm
+   防止 Safari / iPhone 多出空白第二页
 ===================================================== */
 
 .sheet {
-  position: relative;
 
-  width: 210mm;
-height: 296.8mm;
+  position:
+    relative;
 
-min-width: 210mm;
-max-width: 210mm;
+  width:
+    210mm;
 
-min-height: 296.8mm;
-max-height: 296.8mm;
+  height:
+    296.8mm;
 
-  overflow: hidden;
+  min-width:
+    210mm;
 
-  padding: 7mm;
+  max-width:
+    210mm;
 
-  page-break-after: auto !important;
-  break-after: auto !important;
-  page-break-before: auto !important;
-  break-before: auto !important;
-  break-inside: avoid !important;
+  min-height:
+    296.8mm;
+
+  max-height:
+    296.8mm;
+
+  overflow:
+    hidden;
+
+  padding:
+    7mm;
+
+  page-break-after:
+    auto !important;
+
+  break-after:
+    auto !important;
+
+  page-break-before:
+    auto !important;
+
+  break-before:
+    auto !important;
+
+  break-inside:
+    avoid !important;
+
 }
 
 
 /* =====================================================
    APP BACKGROUND
-   直接用图片，不使用 CSS background
-   iPhone 打印预览更稳定
+
+   使用图片，不使用 CSS background
+   iPhone Safari 打印会更加稳定
 ===================================================== */
 
 .page-background {
 
-  position: absolute;
+  position:
+    absolute;
 
-  inset: 0;
+  inset:
+    0;
 
-  width: 100%;
-  height: 100%;
+  width:
+    100%;
 
-  object-fit: cover;
+  height:
+    100%;
 
-  object-position: center top;
-  opacity: 0.72;
+  object-fit:
+    cover;
 
-  z-index: 0;
+  object-position:
+    center top;
+
+  opacity:
+    0.72;
+
+  z-index:
+    0;
 
 }
 
@@ -2557,28 +2694,60 @@ max-height: 296.8mm;
 ===================================================== */
 
 .content-card {
-  position: relative;
-  z-index: 2;
 
-  width: 100%;
+  position:
+    relative;
 
-  height: 282.4mm;
-min-height: 282.4mm;
-max-height: 282.4mm;
+  z-index:
+    2;
 
-  padding: 8mm;
+  width:
+    100%;
 
-  border-radius: 30px;
+  height:
+    282mm;
 
-  overflow: hidden;
+  min-height:
+    282mm;
 
-  background: rgba(255,255,255,.88);
+  max-height:
+    282mm;
 
-  border: 1px solid rgba(255,255,255,.92);
+  padding:
+    8mm;
+
+  border-radius:
+    30px;
+
+  overflow:
+    hidden;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      .88
+    );
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      .92
+    );
 
   box-shadow:
     0 8px 28px
-    rgba(80,110,115,.10);
+    rgba(
+      80,
+      110,
+      115,
+      .10
+    );
+
 }
 
 
@@ -2588,30 +2757,40 @@ max-height: 282.4mm;
 
 .top-decoration {
 
-  text-align: center;
+  text-align:
+    center;
 
-  color: #b99b82;
+  color:
+    #b99b82;
 
-  font-size: 11px;
+  font-size:
+    11px;
 
-  letter-spacing: 4px;
+  letter-spacing:
+    4px;
 
-  margin-bottom: 5mm;
+  margin-bottom:
+    5mm;
 
 }
 
 
 .top-decoration::before {
 
-  content: "♡";
+  content:
+    "♡";
 
-  display: block;
+  display:
+    block;
 
-  font-size: 20px;
+  font-size:
+    20px;
 
-  color: #d9a7aa;
+  color:
+    #d9a7aa;
 
-  margin-bottom: 2mm;
+  margin-bottom:
+    2mm;
 
 }
 
@@ -2622,13 +2801,17 @@ max-height: 282.4mm;
 
 .category {
 
-  text-align: center;
+  text-align:
+    center;
 
-  color: #91a9ad;
+  color:
+    #91a9ad;
 
-  font-size: 15px;
+  font-size:
+    15px;
 
-  margin-bottom: 3mm;
+  margin-bottom:
+    3mm;
 
 }
 
@@ -2640,22 +2823,24 @@ max-height: 282.4mm;
 h1 {
 
   margin:
-
     0
-
     0
-
     6mm;
 
-  text-align: center;
+  text-align:
+    center;
 
-  color: #8b7355;
+  color:
+    #8b7355;
 
-  font-size: 32px;
+  font-size:
+    32px;
 
-  line-height: 1.35;
+  line-height:
+    1.35;
 
-  font-weight: 600;
+  font-weight:
+    600;
 
 }
 
@@ -2666,15 +2851,20 @@ h1 {
 
 .intro {
 
-  text-align: center;
+  text-align:
+    center;
 
-  color: #71878b;
+  color:
+    #71878b;
 
-  font-size: 14px;
+  font-size:
+    14px;
 
-  line-height: 1.8;
+  line-height:
+    1.8;
 
-  margin-bottom: 7mm;
+  margin-bottom:
+    5mm;
 
 }
 
@@ -2685,28 +2875,37 @@ h1 {
 
 .cover-wrap {
 
-  width: 100%;
+  width:
+    100%;
 
-  margin-bottom: 7mm;
+  margin-bottom:
+    5mm;
 
-  text-align: center;
+  text-align:
+    center;
 
 }
 
 
 .cover {
 
-  display: block;
+  display:
+    block;
 
-  width: 100%;
+  width:
+    100%;
 
-  max-height: 48mm;
+  max-height:
+    42mm;
 
-  object-fit: contain;
+  object-fit:
+    contain;
 
-  object-position: center;
+  object-position:
+    center;
 
-  border-radius: 18px;
+  border-radius:
+    18px;
 
 }
 
@@ -2717,20 +2916,25 @@ h1 {
 
 .info-grid {
 
-  display: grid;
+  display:
+    grid;
 
   grid-template-columns:
     1fr 1fr;
 
-  gap: 6mm;
-margin-top: 3mm;
+  gap:
+    6mm;
+
+  margin-top:
+    3mm;
 
 }
 
 
 .info-box {
 
-  min-width: 0;
+  min-width:
+    0;
 
 }
 
@@ -2738,35 +2942,44 @@ margin-top: 3mm;
 h2 {
 
   margin:
-
     0
-
     0
-
     3mm;
 
-  padding-bottom: 2.5mm;
+  padding-bottom:
+    2.5mm;
 
-  color: #7c979b;
+  color:
+    #7c979b;
 
-  font-size: 19px;
+  font-size:
+    19px;
 
-  font-weight: 600;
+  font-weight:
+    600;
 
   border-bottom:
     1px solid
-    rgba(125,157,162,.35);
+    rgba(
+      125,
+      157,
+      162,
+      .35
+    );
 
 }
 
 
 p {
 
-  margin: 2mm 0;
+  margin:
+    2mm 0;
 
-  font-size: 15px;
+  font-size:
+    15px;
 
-  line-height: 1.7;
+  line-height:
+    1.6;
 
 }
 
@@ -2775,27 +2988,27 @@ ul,
 ol {
 
   margin:
-
     2mm
-
     0
-
     0
-
     5mm;
 
-  padding-left: 6mm;
+  padding-left:
+    6mm;
 
 }
 
 
 li {
 
-  margin: 2.5mm 0;
+  margin:
+    2mm 0;
 
-  font-size: 15px;
+  font-size:
+    14px;
 
-  line-height: 1.65;
+  line-height:
+    1.5;
 
 }
 
@@ -2806,56 +3019,90 @@ li {
 
 .steps {
 
-  margin-top: 4mm;
+  margin-top:
+    3mm;
 
 }
 
 
 /* =====================================================
-   PHOTOS
+   PRODUCTION PHOTOS
 ===================================================== */
 
 .photo-section {
 
-  margin-top: 4mm;
+  margin-top:
+    3mm;
 
 }
 
 
 .photo-grid {
-  display: grid;
+
+  display:
+    grid;
 
   grid-template-columns:
-    repeat(2, minmax(0, 1fr));
+    repeat(
+      2,
+      minmax(
+        0,
+        1fr
+      )
+    );
 
-  gap: 4mm;
+  gap:
+    4mm;
 
-  margin-top: 3mm;
+  margin-top:
+    3mm;
 
-  max-height: 78mm;
+  height:
+    72mm;
 
-  overflow: hidden;
+  max-height:
+    72mm;
+
+  overflow:
+    hidden;
+
 }
 
 
 .photo-grid img {
 
-  display: block;
+  display:
+    block;
 
-  width: 100%;
+  width:
+    100%;
 
-  height: 36mm;
+  height:
+    32mm;
 
-  object-fit: contain;
+  object-fit:
+    contain;
 
-  object-position: center;
+  object-position:
+    center;
 
-  border-radius: 12px;
+  border-radius:
+    12px;
 
-  background: rgba(236,244,244,.35);
+  background:
+    rgba(
+      236,
+      244,
+      244,
+      .35
+    );
 
-  break-inside: avoid;
-  page-break-inside: avoid;
+  break-inside:
+    avoid;
+
+  page-break-inside:
+    avoid;
+
 }
 
 
@@ -2865,33 +3112,46 @@ li {
 
 .footer {
 
-  margin-top: 4mm;
-padding-top: 2mm;
+  margin-top:
+    3mm;
 
-  text-align: center;
+  padding-top:
+    2mm;
 
-  color: #b49b7a;
+  text-align:
+    center;
 
-  font-size: 12px;
+  color:
+    #b49b7a;
 
-  letter-spacing: 1px;
+  font-size:
+    12px;
+
+  letter-spacing:
+    1px;
 
 }
 
 
 .footer::before {
 
-  content: "♡";
+  content:
+    "♡";
 
-  margin-right: 4px;
+  margin-right:
+    4px;
 
-  color: #d9a7aa;
+  color:
+    #d9a7aa;
 
 }
 
 
 /* =====================================================
-   PRINT
+   PRINT MEDIA
+
+   注意：
+   这里绝对不能再写 297mm
 ===================================================== */
 
 @media print {
@@ -2910,20 +3170,37 @@ padding-top: 2mm;
 
   }
 
+
   .sheet {
-  width: 210mm;
-  height: 297mm;
 
-  min-height: 297mm;
-  max-height: 297mm;
+    width:
+      210mm;
 
-  overflow: hidden;
+    height:
+      296.8mm;
 
-  page-break-after: auto !important;
-  break-after: auto !important;
-  page-break-before: auto !important;
-  break-before: auto !important;
-}
+    min-height:
+      296.8mm;
+
+    max-height:
+      296.8mm;
+
+    overflow:
+      hidden;
+
+    page-break-after:
+      auto !important;
+
+    break-after:
+      auto !important;
+
+    page-break-before:
+      auto !important;
+
+    break-before:
+      auto !important;
+
+  }
 
 }
 
@@ -2934,209 +3211,335 @@ padding-top: 2mm;
 
 <body>
 
-  <section class="sheet">
 
-    <!-- App 原本的水彩背景 -->
-    <img
-      class="page-background"
-      src="${backgroundURL}"
-      alt=""
-    >
+<section class="sheet">
 
 
-    <div class="content-card">
+  <!-- =================================================
+       ORIGINAL APP BACKGROUND
+  ================================================== -->
 
-      <div class="top-decoration">
-        MY LITTLE KITCHEN
-      </div>
-
-
-      <div class="category">
-        ${escapeHTML(cat?.name || "")}
-      </div>
-
-
-      <h1>
-        ${escapeHTML(
-          recipe.title || "我的食谱"
-        )}
-      </h1>
+  <img
+    class="page-background"
+    src="${backgroundURL}"
+    alt=""
+  >
 
 
-      ${
-        recipe.intro
-          ? `
-            <div class="intro">
-              ${escapeHTML(recipe.intro)}
-            </div>
-          `
-          : ""
-      }
+  <div class="content-card">
 
 
-      ${
-        recipe.cover
-          ? `
-            <div class="cover-wrap">
-              <img
-                class="cover"
-                src="${recipe.cover}"
-                alt=""
-              >
-            </div>
-          `
-          : ""
-      }
+    <!-- =================================================
+         HEADER
+    ================================================== -->
+
+    <div class="top-decoration">
+
+      MY LITTLE KITCHEN
+
+    </div>
 
 
-      <div class="info-grid">
+    <!-- =================================================
+         CATEGORY
+    ================================================== -->
 
-        <section class="info-box">
+    <div class="category">
 
-          <h2>
-            食材
-          </h2>
+      ${escapeHTML(
+        cat?.name || ""
+      )}
 
-          <ul>
-
-            ${
-              (recipe.ingredients || [])
-                .map(
-                  item => `
-                    <li>
-                      ${escapeHTML(
-                        item.name || ""
-                      )}
-
-                      ${
-                        item.amount
-                          ? `
-                            — ${escapeHTML(
-                              item.amount
-                            )}
-                          `
-                          : ""
-                      }
-                    </li>
-                  `
-                )
-                .join("")
-            }
-
-          </ul>
-
-        </section>
+    </div>
 
 
-        <section class="info-box">
+    <!-- =================================================
+         TITLE
+    ================================================== -->
 
-          <h2>
-            份量 / 时间
-          </h2>
+    <h1>
 
-          <p>
-            份量：
+      ${escapeHTML(
+        recipe.title ||
+        "我的食谱"
+      )}
+
+    </h1>
+
+
+    <!-- =================================================
+         INTRO
+    ================================================== -->
+
+    ${
+      recipe.intro
+        ? `
+          <div class="intro">
+
             ${escapeHTML(
-              recipe.servings || "—"
+              recipe.intro
             )}
-          </p>
 
-          <p>
-            时间：
-            ${escapeHTML(
-              recipe.time || "—"
-            )}
-          </p>
-
-        </section>
-
-      </div>
+          </div>
+        `
+        : ""
+    }
 
 
-      <section class="steps">
+    <!-- =================================================
+         COVER PHOTO
+
+         只显示一次
+    ================================================== -->
+
+    ${
+      coverPhoto
+        ? `
+          <div class="cover-wrap">
+
+            <img
+              class="cover"
+              src="${coverPhoto}"
+              alt=""
+            >
+
+          </div>
+        `
+        : ""
+    }
+
+
+    <!-- =================================================
+         INGREDIENTS / INFO
+    ================================================== -->
+
+    <div class="info-grid">
+
+
+      <section class="info-box">
 
         <h2>
-          烹饪步骤
+          食材
         </h2>
 
-        <ol>
+        <ul>
 
           ${
-            (recipe.steps || [])
+            (recipe.ingredients || [])
               .map(
-                step => `
+                item => `
                   <li>
+
                     ${escapeHTML(
-                      step.text || ""
+                      item.name ||
+                      ""
                     )}
+
+                    ${
+                      item.amount
+                        ? `
+                          — ${escapeHTML(
+                            item.amount
+                          )}
+                        `
+                        : ""
+                    }
+
                   </li>
                 `
               )
               .join("")
           }
 
-        </ol>
+        </ul>
 
       </section>
 
 
-      ${
-        recipe.photos?.length
-          ? `
-            <section class="photo-section">
+      <section class="info-box">
 
-              <h2>
-                制作记录
-              </h2>
+        <h2>
+          份量 / 时间
+        </h2>
 
-              <div class="photo-grid">
+        <p>
 
-                ${recipe.photos
-                  .map(
-                    photo => `
-                      <img
-                        src="${photo}"
-                        alt=""
-                      >
-                    `
-                  )
-                  .join("")}
+          份量：
+          ${escapeHTML(
+            recipe.servings ||
+            "—"
+          )}
 
-              </div>
+        </p>
 
-            </section>
-          `
-          : ""
-      }
+        <p>
 
+          时间：
+          ${escapeHTML(
+            recipe.time ||
+            "—"
+          )}
 
-      <div class="footer">
-        芳芳的小厨房日记
-      </div>
+        </p>
+
+      </section>
+
 
     </div>
 
-  </section>
+
+    <!-- =================================================
+         COOKING STEPS
+    ================================================== -->
+
+    <section class="steps">
+
+      <h2>
+        烹饪步骤
+      </h2>
+
+      <ol>
+
+        ${
+          (recipe.steps || [])
+            .map(
+              step => `
+                <li>
+
+                  ${escapeHTML(
+                    step.text ||
+                    ""
+                  )}
+
+                </li>
+              `
+            )
+            .join("")
+        }
+
+      </ol>
+
+    </section>
+
+
+    <!-- =================================================
+         PRODUCTION RECORD
+
+         封面不会重复
+         最多显示 4 张
+         2 × 2
+    ================================================== -->
+
+    ${
+      galleryPhotos.length
+        ? `
+          <section class="photo-section">
+
+            <h2>
+              制作记录
+            </h2>
+
+            <div class="photo-grid">
+
+              ${galleryPhotos
+                .slice(0, 4)
+                .map(
+                  photo => `
+                    <img
+                      src="${photo}"
+                      alt=""
+                    >
+                  `
+                )
+                .join("")}
+
+            </div>
+
+          </section>
+        `
+        : ""
+    }
+
+
+    <!-- =================================================
+         FOOTER
+    ================================================== -->
+
+    <div class="footer">
+
+      芳芳的小厨房日记
+
+    </div>
+
+
+  </div>
+
+
+</section>
 
 
 <script>
 
 /*
- * 等字体真正加载完成以后
- * 再打开打印预览
+ * 等待：
+ *
+ * 1. 泥木扭扭体字体
+ * 2. background
+ * 3. cover
+ * 4. production photos
+ *
+ * 全部加载完成后才打开 Print。
  */
 
-document.fonts.ready.then(() => {
+Promise.all([
+
+  document.fonts.ready,
+
+  ...[
+    ...document.images
+  ].map(
+    image =>
+
+      image.complete
+
+        ? Promise.resolve()
+
+        : new Promise(
+            resolve => {
+
+              image.addEventListener(
+                "load",
+                resolve,
+                {
+                  once: true
+                }
+              );
+
+              image.addEventListener(
+                "error",
+                resolve,
+                {
+                  once: true
+                }
+              );
+
+            }
+          )
+
+  )
+
+]).then(() => {
 
   setTimeout(() => {
 
     window.print();
 
-  }, 500);
+  }, 700);
 
 });
 
 </script>
+
 
 </body>
 
