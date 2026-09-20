@@ -1,655 +1,471 @@
-// 芳芳的小厨房日记
-// Local-first storage
-// 所有资料保存在浏览器本地，不需要后端
-
-const DB_NAME = "FangFangKitchenDiary";
+const DB_NAME = "fangfang-kitchen-diary";
 const DB_VERSION = 1;
+const STORE_NAME = "app";
 
-const STORES = {
-  recipes: "recipes",
-  shopping: "shopping",
-  settings: "settings"
+const categories = [
+  ["chicken", "鸡肉", "/assets/icons/chicken.png"],
+  ["pork", "猪肉", "/assets/icons/pork.png"],
+  ["fish", "鱼肉", "/assets/icons/fish.png"],
+  ["seafood", "海鲜", "/assets/icons/seafood.png"],
+  ["vegetable", "蔬菜", "/assets/icons/vegetables.png"],
+  ["soup", "汤类", "/assets/icons/soup.png"],
+  ["rice", "饭类", "/assets/icons/rice.png"],
+  ["noodle", "面类", "/assets/icons/noodles.png"],
+  ["egg", "鸡蛋", "/assets/icons/egg.png"],
+  ["chinese-dessert", "中式甜点", "/assets/icons/chinese-dessert.png"],
+  ["coffee", "咖啡", "/assets/icons/coffee.png"],
+  ["drinks", "饮料", "/assets/icons/drinks.png"],
+  ["tofu", "豆腐", "/assets/icons/tofu.png"],
+  ["wellness", "养生", "/assets/icons/healthy.png"],
+  ["western-dessert", "西式甜点", "/assets/icons/western-dessert.png"],
+  ["sauce", "酱料", "/assets/icons/sauce.png"],
+  ["other", "其他", "/assets/icons/other.png"]
+].map(([id, name, icon]) => ({
+  id,
+  name,
+  icon
+}));
+
+const defaultState = {
+  version: 1,
+
+  recipes: [],
+
+  shoppingLists: [],
+
+  profile: {
+    name: "芳芳",
+    bio: "用喜欢的食物，过喜欢的生活 ♡",
+    avatar: ""
+  },
+
+  settings: {
+    snow: true
+  }
 };
 
-const DEFAULT_SETTINGS = {
-  chefName: "芳芳",
-  bio: "用喜欢的食物，过喜欢的生活 ♡",
-  avatar: "",
-};
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
 
-const DB = {
-  open() {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = () => {
+      const db = request.result;
 
-      request.onupgradeneeded = () => {
-        const db = request.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
 
-        if (!db.objectStoreNames.contains(STORES.recipes)) {
-          const store = db.createObjectStore(STORES.recipes, {
-            keyPath: "id",
-          });
+    request.onsuccess = () => {
+      resolve(request.result);
+    };
 
-          store.createIndex("category", "category", { unique: false });
-          store.createIndex("favorite", "favorite", { unique: false });
-          store.createIndex("updatedAt", "updatedAt", { unique: false });
-        }
+    request.onerror = () => {
+      reject(request.error);
+    };
+  });
+}
 
-        if (!db.objectStoreNames.contains(STORES.shopping)) {
-          db.createObjectStore(STORES.shopping, {
-            keyPath: "id",
-          });
-        }
+async function readDB() {
+  try {
+    const db = await openDB();
 
-        if (!db.objectStoreNames.contains(STORES.settings)) {
-          db.createObjectStore(STORES.settings, {
-            keyPath: "id",
-          });
-        }
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(
+        STORE_NAME,
+        "readonly"
+      );
+
+      const request = tx
+        .objectStore(STORE_NAME)
+        .get("state");
+
+      request.onsuccess = () => {
+        resolve(request.result || null);
       };
 
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
+      request.onerror = () => {
+        reject(request.error);
+      };
     });
-  },
+  } catch {
+    try {
+      return JSON.parse(
+        localStorage.getItem(DB_NAME) || "null"
+      );
+    } catch {
+      return null;
+    }
+  }
+}
 
-  transaction(storeName, mode = "readonly") {
-    return this.open().then((db) =>
-      db.transaction(storeName, mode).objectStore(storeName)
+async function writeDB(state) {
+  try {
+    const db = await openDB();
+
+    await new Promise((resolve, reject) => {
+      const tx = db.transaction(
+        STORE_NAME,
+        "readwrite"
+      );
+
+      tx.objectStore(STORE_NAME).put(
+        state,
+        "state"
+      );
+
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+  } catch {
+    localStorage.setItem(
+      DB_NAME,
+      JSON.stringify(state)
     );
-  },
+  }
+}
 
-  getAll(storeName) {
-    return this.transaction(storeName).then(
-      (store) =>
-        new Promise((resolve, reject) => {
-          const request = store.getAll();
-
-          request.onsuccess = () => resolve(request.result || []);
-          request.onerror = () => reject(request.error);
-        })
-    );
-  },
-
-  get(storeName, id) {
-    return this.transaction(storeName).then(
-      (store) =>
-        new Promise((resolve, reject) => {
-          const request = store.get(id);
-
-          request.onsuccess = () => resolve(request.result || null);
-          request.onerror = () => reject(request.error);
-        })
-    );
-  },
-
-  put(storeName, data) {
-    return this.transaction(storeName, "readwrite").then(
-      (store) =>
-        new Promise((resolve, reject) => {
-          const request = store.put(data);
-
-          request.onsuccess = () => resolve(data);
-          request.onerror = () => reject(request.error);
-        })
-    );
-  },
-
-  delete(storeName, id) {
-    return this.transaction(storeName, "readwrite").then(
-      (store) =>
-        new Promise((resolve, reject) => {
-          const request = store.delete(id);
-
-          request.onsuccess = () => resolve(true);
-          request.onerror = () => reject(request.error);
-        })
-    );
-  },
-
-  clear(storeName) {
-    return this.transaction(storeName, "readwrite").then(
-      (store) =>
-        new Promise((resolve, reject) => {
-          const request = store.clear();
-
-          request.onsuccess = () => resolve(true);
-          request.onerror = () => reject(request.error);
-        })
-    );
-  },
-};
-
-
-// --------------------------------------------------
-// Helpers
-// --------------------------------------------------
-
-export function createId(prefix = "item") {
-  return `${prefix}_${Date.now()}_${Math.random()
+function uid(prefix = "id") {
+  return `${prefix}_${Date.now().toString(36)}_${Math.random()
     .toString(36)
-    .slice(2, 10)}`;
+    .slice(2, 8)}`;
 }
 
-export function now() {
-  return new Date().toISOString();
-}
+function normalizeState(raw) {
+  const s =
+    raw && typeof raw === "object"
+      ? raw
+      : {};
 
+  return {
+    ...structuredClone(defaultState),
 
-// --------------------------------------------------
-// Recipes
-// --------------------------------------------------
+    ...s,
 
-export async function getRecipes() {
-  const recipes = await DB.getAll(STORES.recipes);
-
-  return recipes.sort((a, b) => {
-    return new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0);
-  });
-}
-
-export async function getRecipe(id) {
-  return DB.get(STORES.recipes, id);
-}
-
-export async function getRecipesByCategory(category) {
-  const recipes = await getRecipes();
-
-  return recipes.filter((recipe) => recipe.category === category);
-}
-
-export async function getFavoriteRecipes() {
-  const recipes = await getRecipes();
-
-  return recipes.filter((recipe) => recipe.favorite === true);
-}
-
-export async function saveRecipe(recipe) {
-  const existing = recipe.id ? await getRecipe(recipe.id) : null;
-
-  const savedRecipe = {
-    id: recipe.id || createId("recipe"),
-
-    category: recipe.category || "其他",
-
-    name: recipe.name || "",
-    description: recipe.description || "",
-
-    servings: recipe.servings || "",
-    cookingTime: recipe.cookingTime || "",
-
-    ingredients: Array.isArray(recipe.ingredients)
-      ? recipe.ingredients
+    recipes: Array.isArray(s.recipes)
+      ? s.recipes
       : [],
 
-    steps: Array.isArray(recipe.steps)
-      ? recipe.steps
-      : [],
-
-    photos: Array.isArray(recipe.photos)
-      ? recipe.photos
-      : [],
-
-    coverPhoto: recipe.coverPhoto || "",
-
-    favorite:
-      typeof recipe.favorite === "boolean"
-        ? recipe.favorite
-        : existing?.favorite || false,
-
-    createdAt:
-      existing?.createdAt ||
-      recipe.createdAt ||
-      now(),
-
-    updatedAt: now(),
-  };
-
-  await DB.put(STORES.recipes, savedRecipe);
-
-  return savedRecipe;
-}
-
-export async function deleteRecipe(id) {
-  return DB.delete(STORES.recipes, id);
-}
-
-export async function toggleFavorite(id) {
-  const recipe = await getRecipe(id);
-
-  if (!recipe) {
-    return null;
-  }
-
-  recipe.favorite = !recipe.favorite;
-  recipe.updatedAt = now();
-
-  await DB.put(STORES.recipes, recipe);
-
-  return recipe;
-}
-
-
-// --------------------------------------------------
-// Ingredients
-// --------------------------------------------------
-
-export function createIngredient(
-  name = "",
-  amount = ""
-) {
-  return {
-    id: createId("ingredient"),
-    name,
-    amount,
-  };
-}
-
-export function addIngredient(recipe) {
-  const ingredients = Array.isArray(recipe.ingredients)
-    ? [...recipe.ingredients]
-    : [];
-
-  ingredients.push(createIngredient());
-
-  return {
-    ...recipe,
-    ingredients,
-  };
-}
-
-export function removeIngredient(recipe, id) {
-  return {
-    ...recipe,
-    ingredients: (recipe.ingredients || []).filter(
-      (item) => item.id !== id
-    ),
-  };
-}
-
-
-// --------------------------------------------------
-// Cooking steps
-// --------------------------------------------------
-
-export function createStep(text = "") {
-  return {
-    id: createId("step"),
-    text,
-  };
-}
-
-export function addStep(recipe) {
-  const steps = Array.isArray(recipe.steps)
-    ? [...recipe.steps]
-    : [];
-
-  steps.push(createStep());
-
-  return {
-    ...recipe,
-    steps,
-  };
-}
-
-export function removeStep(recipe, id) {
-  return {
-    ...recipe,
-    steps: (recipe.steps || []).filter(
-      (item) => item.id !== id
-    ),
-  };
-}
-
-
-// --------------------------------------------------
-// Shopping list
-// --------------------------------------------------
-
-export async function getShoppingLists() {
-  const lists = await DB.getAll(STORES.shopping);
-
-  return lists.sort((a, b) => {
-    return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
-  });
-}
-
-export async function saveShoppingList(list) {
-  const saved = {
-    id: list.id || createId("shopping"),
-
-    title: list.title || "今天要买什么？",
-
-    items: Array.isArray(list.items)
-      ? list.items
-      : [],
-
-    createdAt:
-      list.createdAt ||
-      now(),
-
-    updatedAt: now(),
-  };
-
-  await DB.put(STORES.shopping, saved);
-
-  return saved;
-}
-
-export async function deleteShoppingList(id) {
-  return DB.delete(STORES.shopping, id);
-}
-
-export function createShoppingItem(
-  name = "",
-  quantity = ""
-) {
-  return {
-    id: createId("shopping-item"),
-    name,
-    quantity,
-    completed: false,
-  };
-}
-
-export async function toggleShoppingItem(
-  listId,
-  itemId
-) {
-  const list = await DB.get(
-    STORES.shopping,
-    listId
-  );
-
-  if (!list) {
-    return null;
-  }
-
-  list.items = (list.items || []).map((item) => {
-    if (item.id === itemId) {
-      return {
-        ...item,
-        completed: !item.completed,
-      };
-    }
-
-    return item;
-  });
-
-  list.updatedAt = now();
-
-  await DB.put(STORES.shopping, list);
-
-  return list;
-}
-
-
-// --------------------------------------------------
-// Settings / Chef profile
-// --------------------------------------------------
-
-export async function getSettings() {
-  const settings = await DB.get(
-    STORES.settings,
-    "profile"
-  );
-
-  return {
-    ...DEFAULT_SETTINGS,
-    ...(settings || {}),
-  };
-}
-
-export async function saveSettings(settings) {
-  const saved = {
-    id: "profile",
-
-    ...DEFAULT_SETTINGS,
-
-    ...settings,
-
-    updatedAt: now(),
-  };
-
-  await DB.put(STORES.settings, saved);
-
-  return saved;
-}
-
-
-// --------------------------------------------------
-// Backup
-// --------------------------------------------------
-
-export async function createBackup() {
-  const recipes = await getRecipes();
-  const shopping = await getShoppingLists();
-  const settings = await getSettings();
-
-  return {
-    app: "芳芳的小厨房日记",
-    version: 1,
-
-    exportedAt: now(),
-
-    recipes,
-    shopping,
-    settings,
-  };
-}
-
-export async function downloadBackup() {
-  const backup = await createBackup();
-
-  const json = JSON.stringify(
-    backup,
-    null,
-    2
-  );
-
-  const blob = new Blob(
-    [json],
-    {
-      type: "application/json",
-    }
-  );
-
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-
-  a.href = url;
-
-  const date = new Date()
-    .toISOString()
-    .slice(0, 10);
-
-  a.download =
-    `芳芳的小厨房日记-backup-${date}.json`;
-
-  document.body.appendChild(a);
-
-  a.click();
-
-  a.remove();
-
-  URL.revokeObjectURL(url);
-}
-
-
-// --------------------------------------------------
-// Restore
-// --------------------------------------------------
-
-export async function restoreBackup(file) {
-  if (!file) {
-    throw new Error("没有选择备份文件");
-  }
-
-  const text = await file.text();
-
-  const backup = JSON.parse(text);
-
-  if (
-    !backup ||
-    backup.app !== "芳芳的小厨房日记"
-  ) {
-    throw new Error(
-      "这不是有效的芳芳的小厨房日记备份文件"
-    );
-  }
-
-  await DB.clear(STORES.recipes);
-  await DB.clear(STORES.shopping);
-  await DB.clear(STORES.settings);
-
-  for (const recipe of backup.recipes || []) {
-    await DB.put(
-      STORES.recipes,
-      recipe
-    );
-  }
-
-  for (const list of backup.shopping || []) {
-    await DB.put(
-      STORES.shopping,
-      list
-    );
-  }
-
-  if (backup.settings) {
-    await DB.put(
-      STORES.settings,
-      {
-        id: "profile",
-        ...backup.settings,
-      }
-    );
-  }
-
-  return true;
-}
-
-
-// --------------------------------------------------
-// Export PDF / Print helper
-// --------------------------------------------------
-
-export function printRecipe(recipe) {
-  if (!recipe) {
-    return;
-  }
-
-  window.dispatchEvent(
-    new CustomEvent(
-      "fangfang:print-recipe",
-      {
-        detail: recipe,
-      }
+    shoppingLists: Array.isArray(
+      s.shoppingLists
     )
-  );
-}
+      ? s.shoppingLists
+      : [],
 
+    profile: {
+      ...defaultState.profile,
+      ...(s.profile || {})
+    },
 
-// --------------------------------------------------
-// Search
-// --------------------------------------------------
-
-export async function searchRecipes(query) {
-  const recipes = await getRecipes();
-
-  const keyword = String(query || "")
-    .trim()
-    .toLowerCase();
-
-  if (!keyword) {
-    return recipes;
-  }
-
-  return recipes.filter((recipe) => {
-    const text = [
-      recipe.name,
-      recipe.description,
-      recipe.category,
-      recipe.servings,
-      recipe.cookingTime,
-
-      ...(recipe.ingredients || []).map(
-        (item) =>
-          `${item.name} ${item.amount}`
-      ),
-
-      ...(recipe.steps || []).map(
-        (step) => step.text
-      ),
-    ]
-      .join(" ")
-      .toLowerCase();
-
-    return text.includes(keyword);
-  });
-}
-
-
-// --------------------------------------------------
-// Statistics
-// --------------------------------------------------
-
-export async function getStatistics() {
-  const recipes = await getRecipes();
-
-  const favoriteCount = recipes.filter(
-    (recipe) => recipe.favorite
-  ).length;
-
-  const categoryCount =
-    new Set(
-      recipes.map(
-        (recipe) => recipe.category
-      )
-    ).size;
-
-  return {
-    totalRecipes: recipes.length,
-    favoriteRecipes: favoriteCount,
-    usedCategories: categoryCount,
+    settings: {
+      ...defaultState.settings,
+      ...(s.settings || {})
+    }
   };
 }
 
+export function createStore() {
+  let state =
+    normalizeState(null);
 
-// --------------------------------------------------
-// New empty recipe
-// --------------------------------------------------
+  const listeners = new Set();
 
-export function createEmptyRecipe(
-  category = "其他"
+  let readyResolve;
+
+  const ready = new Promise(
+    resolve => {
+      readyResolve = resolve;
+    }
+  );
+
+  (async () => {
+    const saved =
+      await readDB();
+
+    state =
+      normalizeState(saved);
+
+    readyResolve(state);
+
+    listeners.forEach(
+      fn => fn(state)
+    );
+  })();
+
+  const api = {
+    categories,
+
+    ready,
+
+    getState() {
+      return state;
+    },
+
+    subscribe(fn) {
+      listeners.add(fn);
+
+      return () =>
+        listeners.delete(fn);
+    },
+
+    async setState(next) {
+      state =
+        normalizeState(
+          typeof next === "function"
+            ? next(state)
+            : next
+        );
+
+      await writeDB(state);
+
+      listeners.forEach(
+        fn => fn(state)
+      );
+
+      return state;
+    },
+
+    async upsertRecipe(recipe) {
+      const next = {
+        ...recipe,
+
+        id:
+          recipe.id ||
+          uid("recipe"),
+
+        updatedAt:
+          new Date().toISOString()
+      };
+
+      const list = [
+        ...state.recipes
+      ];
+
+      const index =
+        list.findIndex(
+          r => r.id === next.id
+        );
+
+      if (index >= 0) {
+        list[index] = next;
+      } else {
+        list.unshift(next);
+      }
+
+      await api.setState({
+        ...state,
+        recipes: list
+      });
+
+      return next;
+    },
+
+    async deleteRecipe(id) {
+      return api.setState({
+        ...state,
+
+        recipes:
+          state.recipes.filter(
+            r => r.id !== id
+          )
+      });
+    },
+
+    async toggleFavorite(id) {
+      return api.setState({
+        ...state,
+
+        recipes:
+          state.recipes.map(
+            r =>
+              r.id === id
+                ? {
+                    ...r,
+                    favorite:
+                      !r.favorite
+                  }
+                : r
+          )
+      });
+    },
+
+    async addShoppingList(list) {
+      const item = {
+        ...list,
+
+        id: uid("list"),
+
+        createdAt:
+          new Date().toISOString()
+      };
+
+      return api.setState({
+        ...state,
+
+        shoppingLists: [
+          item,
+          ...state.shoppingLists
+        ]
+      });
+    },
+
+    async updateShoppingList(
+      id,
+      patch
+    ) {
+      return api.setState({
+        ...state,
+
+        shoppingLists:
+          state.shoppingLists.map(
+            item =>
+              item.id === id
+                ? {
+                    ...item,
+                    ...patch
+                  }
+                : item
+          )
+      });
+    },
+
+    async deleteShoppingList(id) {
+      return api.setState({
+        ...state,
+
+        shoppingLists:
+          state.shoppingLists.filter(
+            item =>
+              item.id !== id
+          )
+      });
+    },
+
+    async updateProfile(profile) {
+      return api.setState({
+        ...state,
+
+        profile: {
+          ...state.profile,
+          ...profile
+        }
+      });
+    },
+
+    async resetAll() {
+      return api.setState(
+        structuredClone(
+          defaultState
+        )
+      );
+    },
+
+    async exportBackup() {
+      await ready;
+
+      const blob = new Blob(
+        [
+          JSON.stringify(
+            state,
+            null,
+            2
+          )
+        ],
+        {
+          type:
+            "application/json"
+        }
+      );
+
+      const url =
+        URL.createObjectURL(
+          blob
+        );
+
+      const a =
+        document.createElement(
+          "a"
+        );
+
+      a.href = url;
+
+      a.download =
+        `芳芳的小厨房日记-备份-${new Date()
+          .toISOString()
+          .slice(0, 10)}.json`;
+
+      document.body.appendChild(a);
+
+      a.click();
+
+      a.remove();
+
+      setTimeout(
+        () =>
+          URL.revokeObjectURL(
+            url
+          ),
+        1000
+      );
+    },
+
+    async importBackup(file) {
+      const text =
+        await file.text();
+
+      const incoming =
+        normalizeState(
+          JSON.parse(text)
+        );
+
+      await api.setState(
+        incoming
+      );
+    }
+  };
+
+  return api;
+}
+
+export function blankRecipe(
+  categoryId = "chicken"
 ) {
   return {
-    id: createId("recipe"),
+    id: null,
 
-    category,
+    categoryId,
 
-    name: "",
-    description: "",
+    title: "",
+
+    intro: "",
 
     servings: "",
-    cookingTime: "",
+
+    time: "",
 
     ingredients: [
-      createIngredient(),
+      {
+        name: "",
+        amount: ""
+      }
     ],
 
     steps: [
-      createStep(),
+      {
+        text: ""
+      }
     ],
 
     photos: [],
 
-    coverPhoto: "",
+    cover: "",
 
     favorite: false,
 
-    createdAt: now(),
-    updatedAt: now(),
+    createdAt:
+      new Date().toISOString(),
+
+    updatedAt:
+      new Date().toISOString()
   };
 }
