@@ -4606,3 +4606,179 @@ body {
   }
 
 }
+/* =====================================================
+   MY PROFILE — FINAL JOURNAL POLISH
+   Soften emoji decorations to match watercolor journal
+===================================================== */
+
+/* ---------- statistics ---------- */
+
+.profile-stat-icon {
+  width: 34px;
+  height: 28px;
+
+  margin-bottom: 4px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family:
+    Georgia,
+    "Times New Roman",
+    serif;
+
+  font-size: 22px !important;
+
+  opacity: 0.68;
+
+  filter: saturate(0.55);
+
+  transform: scale(0.86);
+}
+
+
+/* ---------- middle recipe card ---------- */
+
+.profile-recipe-art {
+  position: relative;
+
+  opacity: 0.72;
+}
+
+
+/* book */
+
+.profile-book {
+  font-size: 53px !important;
+
+  opacity: 0.62;
+
+  filter: saturate(0.45);
+
+  transform:
+    rotate(-5deg)
+    scale(0.88);
+}
+
+
+/* cat */
+
+.profile-cat {
+  font-size: 28px !important;
+
+  opacity: 0.62;
+
+  filter: saturate(0.45);
+
+  transform: scale(0.9);
+}
+
+
+/* little flowers */
+
+.profile-flower {
+  font-size: 21px !important;
+
+  opacity: 0.58;
+
+  filter: saturate(0.45);
+}
+
+
+/* ---------- backup ---------- */
+
+.profile-backup-text h2 {
+  letter-spacing: 0.5px;
+}
+
+
+/* make the backup icons quieter */
+
+.backup-icon-button {
+  font-size: 19px;
+
+  opacity: 0.68;
+
+  filter: saturate(0.45);
+}
+
+
+.backup-restore-button span {
+  font-size: 16px;
+
+  opacity: 0.68;
+
+  filter: saturate(0.45);
+}
+
+
+/* ---------- about ---------- */
+
+.profile-about-icon {
+  font-size: 23px;
+
+  opacity: 0.62;
+
+  filter: saturate(0.45);
+}
+
+
+.profile-about-art {
+  font-size: 28px;
+
+  opacity: 0.58;
+
+  filter: saturate(0.45);
+}
+
+
+/* ---------- overall card softness ---------- */
+
+.profile-stats-four,
+.profile-recipe-card,
+.profile-backup-card,
+.profile-about-card {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.91),
+      rgba(255, 250, 246, 0.84)
+    );
+
+  box-shadow:
+    0 5px 20px
+    rgba(90, 120, 125, 0.09);
+}
+
+
+/* ---------- mobile ---------- */
+
+@media (max-width: 480px) {
+
+  .profile-stat-icon {
+    width: 30px;
+    height: 25px;
+
+    font-size: 19px !important;
+
+    transform: scale(0.82);
+  }
+
+  .profile-book {
+    font-size: 47px !important;
+  }
+
+  .profile-cat {
+    font-size: 25px !important;
+  }
+
+  .profile-flower {
+    font-size: 18px !important;
+  }
+
+  .profile-about-art {
+    font-size: 25px;
+  }
+
+}
