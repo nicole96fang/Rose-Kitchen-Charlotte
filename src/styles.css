@@ -4782,3 +4782,202 @@ body {
   }
 
 }
+/* =====================================================
+   PROFILE — FINAL SPACING & JOURNAL BALANCE
+===================================================== */
+
+/* 给页面最底部留出足够空间，
+   防止 About / Quote 被固定导航遮住 */
+
+.profile-page {
+  padding-bottom: 190px !important;
+}
+
+
+/* =====================================================
+   STATS — LESS EMOJI, MORE JOURNAL
+===================================================== */
+
+.profile-stat-icon {
+  font-size: 18px !important;
+  opacity: 0.48 !important;
+  filter: grayscale(0.25) saturate(0.35);
+}
+
+
+/* =====================================================
+   RECIPE CARD — MORE AIRY & BALANCED
+===================================================== */
+
+.profile-recipe-card {
+  min-height: 185px;
+
+  position: relative;
+
+  overflow: hidden;
+}
+
+
+/* very soft decorative botanical feeling */
+
+.profile-recipe-card::before {
+  content: "✿";
+
+  position: absolute;
+
+  left: 42px;
+  top: 32px;
+
+  color: #9bb4b5;
+
+  opacity: 0.22;
+
+  font-size: 25px;
+}
+
+
+.profile-recipe-card::after {
+  content: "✿";
+
+  position: absolute;
+
+  left: 135px;
+  bottom: 28px;
+
+  color: #d4a9a7;
+
+  opacity: 0.20;
+
+  font-size: 20px;
+}
+
+
+/* keep the decoration subtle */
+
+.profile-recipe-art {
+  opacity: 0.58;
+
+  transform: translateY(2px);
+}
+
+
+.profile-book {
+  opacity: 0.55;
+
+  transform:
+    rotate(-5deg)
+    scale(0.82);
+}
+
+
+.profile-cat {
+  opacity: 0.50;
+
+  transform: scale(0.78);
+
+  right: 12%;
+  bottom: 15px;
+}
+
+
+/* =====================================================
+   RECIPE NUMBER
+===================================================== */
+
+.profile-recipe-info > strong {
+  font-size: 42px;
+
+  color: #4e5d62;
+}
+
+
+.profile-recipe-info > span {
+  font-size: 14px;
+
+  color: #596b70;
+}
+
+
+.profile-recipe-info p {
+  color: #7f8d90;
+
+  line-height: 1.8;
+}
+
+
+/* =====================================================
+   BACKUP CARD
+===================================================== */
+
+.profile-backup-card {
+  min-height: 145px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: center;
+}
+
+
+.profile-backup-actions {
+  margin-top: 13px;
+}
+
+
+/* =====================================================
+   ABOUT CARD
+===================================================== */
+
+.profile-about-card {
+  min-height: 88px;
+
+  margin-top: 0;
+}
+
+
+/* =====================================================
+   QUOTE
+===================================================== */
+
+.profile-quote {
+  margin-top: 8px;
+  margin-bottom: 12px;
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 480px) {
+
+  .profile-page {
+    padding-bottom: 195px !important;
+  }
+
+  .profile-recipe-card {
+    min-height: 178px;
+  }
+
+  .profile-recipe-art {
+    min-height: 140px;
+  }
+
+  .profile-book {
+    font-size: 46px !important;
+  }
+
+  .profile-cat {
+    font-size: 24px !important;
+  }
+
+  .profile-recipe-info > strong {
+    font-size: 39px;
+  }
+
+  .profile-recipe-info > span {
+    font-size: 13px;
+  }
+
+}
