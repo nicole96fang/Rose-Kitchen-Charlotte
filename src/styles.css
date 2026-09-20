@@ -5099,3 +5099,31 @@ body {
     padding-bottom: 300px !important;
   }
 }
+/* =====================================================
+   PROFILE — BOTTOM CONTENT SCROLL SPACE
+===================================================== */
+
+.profile-page {
+  padding-bottom: 330px !important;
+}
+
+/* Make sure the final sections are above the nav
+   when the user scrolls to the bottom */
+
+.profile-about-card,
+.profile-quote,
+.profile-local-save {
+  position: relative;
+  z-index: 3;
+}
+
+/* Extra breathing room after the final text */
+.profile-local-save {
+  padding-bottom: 35px !important;
+}
+
+@media (max-width: 480px) {
+  .profile-page {
+    padding-bottom: 330px !important;
+  }
+}
