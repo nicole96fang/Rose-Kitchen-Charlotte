@@ -1,3 +1,32 @@
+/* =====================================================
+   NEEDMOOD NIUNIU — GLOBAL APP FONT
+   全 App 中文 / English / ABC / 数字统一字体
+===================================================== */
+
+@font-face {
+  font-family: "NeedMoodNiuNiu";
+
+  src: url("../assets/fonts/泥木扭扭体NeedMood NiuNiu.ttf")
+    format("truetype");
+
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+
+/* 全 App 统一字体 */
+
+html,
+body,
+button,
+input,
+textarea,
+select,
+option,
+* {
+  font-family: "NeedMoodNiuNiu", sans-serif !important;
+}
 :root {
   --blue: #8daeb8;
   --blue-dark: #668f9d;
