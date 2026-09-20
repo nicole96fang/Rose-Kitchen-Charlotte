@@ -2935,3 +2935,171 @@ body {
   }
 
 }
+/* =====================================================
+   FIX HOME FEATURED CARDS
+   Keep category artwork SMALL like reference design
+===================================================== */
+
+.home-page .featured-strip {
+  width: 100%;
+
+  display: grid !important;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr)) !important;
+
+  gap: 8px;
+
+  padding: 8px;
+
+  margin:
+    0 0 14px;
+
+  box-sizing: border-box;
+
+  border-radius: 26px;
+
+  background:
+    rgba(255, 253, 250, 0.82);
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.95);
+
+  box-shadow:
+    0 6px 22px
+    rgba(80, 110, 115, 0.08);
+}
+
+
+.home-page .featured-card {
+  width: 100% !important;
+
+  min-width: 0 !important;
+
+  min-height: 118px !important;
+
+  display: flex !important;
+
+  flex-direction: column !important;
+
+  align-items: center !important;
+
+  justify-content: center !important;
+
+  padding: 6px !important;
+
+  overflow: hidden !important;
+
+  border-radius: 20px;
+
+  background:
+    rgba(255, 255, 255, 0.48);
+
+  box-sizing: border-box;
+}
+
+
+.home-page .featured-image {
+  width: 100% !important;
+
+  height: 72px !important;
+
+  min-height: 72px !important;
+
+  max-height: 72px !important;
+
+  display: flex !important;
+
+  align-items: center !important;
+
+  justify-content: center !important;
+
+  overflow: hidden !important;
+
+  border-radius: 18px;
+
+  background:
+    rgba(236, 244, 244, 0.55);
+}
+
+
+.home-page .featured-image img {
+  display: block !important;
+
+  width: auto !important;
+
+  height: auto !important;
+
+  max-width: 100% !important;
+
+  max-height: 72px !important;
+
+  object-fit: contain !important;
+
+  object-position: center !important;
+}
+
+
+.home-page .featured-card > span {
+  display: block !important;
+
+  width: 100%;
+
+  margin-top: 6px;
+
+  text-align: center;
+
+  color:
+    #536b71;
+
+  font-size: 11px;
+
+  line-height: 1.2;
+
+  white-space: nowrap;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 480px) {
+
+  .home-page .featured-strip {
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr)) !important;
+
+    gap: 5px;
+
+    padding: 6px;
+  }
+
+
+  .home-page .featured-card {
+    min-height: 105px !important;
+
+    padding: 5px !important;
+  }
+
+
+  .home-page .featured-image {
+    height: 61px !important;
+
+    min-height: 61px !important;
+
+    max-height: 61px !important;
+  }
+
+
+  .home-page .featured-image img {
+    max-height: 61px !important;
+  }
+
+
+  .home-page .featured-card > span {
+    margin-top: 5px;
+
+    font-size: 10px;
+  }
+
+}
