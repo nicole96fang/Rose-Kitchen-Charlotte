@@ -2472,7 +2472,7 @@ body,
 ===================================================== */
 
 @page {
-  size: A4;
+  size: 210mm 297mm;
   margin: 0;
 }
 
@@ -2507,13 +2507,13 @@ body {
   position: relative;
 
   width: 210mm;
-  height: 297mm;
+height: 296.8mm;
 
-  min-width: 210mm;
-  max-width: 210mm;
+min-width: 210mm;
+max-width: 210mm;
 
-  min-height: 297mm;
-  max-height: 297mm;
+min-height: 296.8mm;
+max-height: 296.8mm;
 
   overflow: hidden;
 
@@ -2562,9 +2562,9 @@ body {
 
   width: 100%;
 
-  height: 283mm;
-  min-height: 283mm;
-  max-height: 283mm;
+  height: 282.4mm;
+min-height: 282.4mm;
+max-height: 282.4mm;
 
   padding: 8mm;
 
@@ -2826,27 +2826,28 @@ li {
   display: grid;
 
   grid-template-columns:
-    repeat(3, 1fr);
+    repeat(2, minmax(0, 1fr));
 
-  gap: 3mm;
+  gap: 4mm;
 
   margin-top: 3mm;
 
-  max-height: 36mm;
+  max-height: 78mm;
 
   overflow: hidden;
 }
 
 
 .photo-grid img {
+
   display: block;
 
   width: 100%;
-  height: auto;
 
-  max-height: 32mm;
+  height: 36mm;
 
   object-fit: contain;
+
   object-position: center;
 
   border-radius: 12px;
