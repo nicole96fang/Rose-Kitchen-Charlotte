@@ -1873,16 +1873,26 @@ function openShoppingModal() {
 // ==================================================
 
 function renderProfile(state) {
-  const profile =
-    state.profile || {};
+  const profile = state.profile || {};
 
-  app.innerHTML = `
-    <div class="page profile-page">
+  const recipeCount = recipes().length;
 
-      <section class="profile-header">
+  const favoriteCount =
+    recipes().filter(
+      item => item.favorite
+    ).length;
 
-        <div class="profile-avatar">
-  ${
+  const shoppingCount =
+    (state.shoppingLists || []).reduce(
+      (total, list) =>
+        total + (list.items || []).length,
+      0
+    );
+
+  const categoryCount =
+    store.categories.length;
+
+  const avatarHTML =
     profile.avatar
       ? `
         <img
@@ -1895,162 +1905,385 @@ function renderProfile(state) {
           src="./assets/avatar-profile.png"
           alt="My Kitchen Rose"
         />
-      `
-  }
-</div>
+      `;
 
-        <p>My Kitchen</p>
+  app.innerHTML = `
+    <div class="page profile-page">
 
-        <h1>
-          ${escapeHTML(
-            profile.name ||
-            "芳芳"
-          )}
-        </h1>
+      <!-- =====================================
+           PROFILE HERO
+      ====================================== -->
 
-        <span>
-          ${escapeHTML(
-            profile.bio ||
-            "用喜欢的食物，过喜欢的生活 ♡"
-          )}
-        </span>
+      <section class="profile-hero">
+
+        <div class="profile-topbar">
+
+          <div class="profile-avatar-wrap">
+            <div class="profile-avatar">
+              ${avatarHTML}
+            </div>
+          </div>
+
+          <div class="profile-title">
+
+            <h1>我的</h1>
+
+            <span>
+              MY PROFILE
+            </span>
+
+            <div class="profile-title-line">
+              <i></i>
+              <b>♡</b>
+              <i></i>
+            </div>
+
+          </div>
+
+          <div class="profile-tools">
+
+            <button
+              class="profile-tool"
+              id="profile-search"
+              aria-label="搜索"
+            >
+              ⌕
+            </button>
+
+            <button
+              class="profile-tool"
+              id="profile-settings"
+              aria-label="设置"
+            >
+              ⚙
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <div class="profile-intro">
+
+          <p>
+            记录生活，
+          </p>
+
+          <strong>
+            也记录更好的自己 ♡
+          </strong>
+
+        </div>
 
       </section>
 
-      <section class="profile-stats">
 
-        <div>
+      <!-- =====================================
+           FOUR STATISTICS
+      ====================================== -->
+
+      <section class="profile-stats profile-stats-four">
+
+        <div class="profile-stat">
+
+          <div class="profile-stat-icon">
+            📖
+          </div>
+
           <strong>
-            ${recipes().length}
+            ${categoryCount}
           </strong>
-          <span>食谱</span>
+
+          <span>
+            分类
+          </span>
+
         </div>
 
-        <div>
+
+        <div class="profile-stat">
+
+          <div class="profile-stat-icon">
+            📝
+          </div>
+
           <strong>
-            ${
-              recipes().filter(
-                item =>
-                  item.favorite
-              ).length
-            }
+            ${recipeCount}
           </strong>
-          <span>收藏</span>
+
+          <span>
+            食谱
+          </span>
+
         </div>
 
-        <div>
+
+        <div class="profile-stat">
+
+          <div class="profile-stat-icon">
+            ♡
+          </div>
+
           <strong>
-            ${
-              store.categories.filter(
-                item =>
-                  categoryRecipes(
-                    item.id
-                  ).length
-              ).length
-            }
+            ${favoriteCount}
           </strong>
-          <span>分类</span>
+
+          <span>
+            收藏
+          </span>
+
+        </div>
+
+
+        <div class="profile-stat">
+
+          <div class="profile-stat-icon">
+            🛒
+          </div>
+
+          <strong>
+            ${shoppingCount}
+          </strong>
+
+          <span>
+            购买清单
+          </span>
+
         </div>
 
       </section>
 
-      <section class="settings-card">
 
-        <button
-          class="settings-row"
-          id="edit-profile"
-        >
-          <span>👩🏻‍🍳</span>
-          <div>
-            <strong>主厨资料</strong>
-            <small>
-              修改名字与个人介绍
-            </small>
-          </div>
-          <b>›</b>
-        </button>
+      <!-- =====================================
+           RECIPE OVERVIEW
+      ====================================== -->
 
-        <button
-          class="settings-row"
-          id="backup-data"
-        >
-          <span>💾</span>
-          <div>
-            <strong>备份食谱</strong>
-            <small>
-              下载本机备份文件
-            </small>
-          </div>
-          <b>›</b>
-        </button>
+      <section class="profile-recipe-card">
 
-        <label
-          class="settings-row"
-        >
-          <span>🔄</span>
-          <div>
-            <strong>恢复备份</strong>
-            <small>
-              从 JSON 文件恢复
-            </small>
+        <div class="profile-recipe-art">
+
+          <div class="profile-flower flower-one">
+            ✿
           </div>
 
-          <input
-            id="restore-file"
-            type="file"
-            accept=".json,application/json"
-            hidden
-          />
+          <div class="profile-book">
+            📚
+          </div>
 
-          <b>›</b>
-        </label>
+          <div class="profile-cat">
+            🐈
+          </div>
+
+          <div class="profile-flower flower-two">
+            ✿
+          </div>
+
+        </div>
+
+
+        <div class="profile-recipe-info">
+
+          <strong>
+            ${recipeCount}
+          </strong>
+
+          <span>
+            道食谱
+          </span>
+
+          <p>
+            用喜欢的食物，<br />
+            过喜欢的生活 ♡
+          </p>
+
+        </div>
 
       </section>
 
-      <div class="local-note">
-        <strong>本地保存 ♡</strong>
+
+      <!-- =====================================
+           BACKUP
+      ====================================== -->
+
+      <section class="profile-backup-card">
+
+        <div class="profile-backup-text">
+
+          <h2>
+            🛡️ 数据备份
+          </h2>
+
+          <p>
+            本地自动保存已开启。建议定期手动备份，
+            防止误清除 Safari 数据导致食谱丢失。
+          </p>
+
+        </div>
+
+
+        <div class="profile-backup-actions">
+
+          <button
+            class="backup-icon-button"
+            id="backup-data"
+            aria-label="备份食谱"
+          >
+            ⬇️
+          </button>
+
+
+          <label
+            class="backup-restore-button"
+          >
+
+            <span>
+              ⬆️
+            </span>
+
+            <strong>
+              导入恢复
+            </strong>
+
+            <input
+              id="restore-file"
+              type="file"
+              accept=".json,application/json"
+              hidden
+            />
+
+          </label>
+
+        </div>
+
+      </section>
+
+
+      <!-- =====================================
+           ABOUT
+      ====================================== -->
+
+      <section class="profile-about-card">
+
+        <div class="profile-about-icon">
+          🌿
+        </div>
+
+        <div class="profile-about-text">
+
+          <h2>
+            关于
+          </h2>
+
+          <p>
+            芳芳的厨房日记 · 记录每一道治愈的味道
+          </p>
+
+        </div>
+
+        <div class="profile-about-art">
+          💌
+        </div>
+
+      </section>
+
+
+      <!-- =====================================
+           LITTLE QUOTE
+      ====================================== -->
+
+      <div class="profile-quote">
+        ♡ 珍藏生活里的小美好 ♡
+      </div>
+
+
+      <!-- =====================================
+           LOCAL SAVE
+      ====================================== -->
+
+      <section class="profile-local-save">
+
+        <strong>
+          本地自动保存 ♡
+        </strong>
+
         <p>
           食谱会自动保存在这台设备的浏览器中。
-          建议定期使用「备份食谱」保存一份副本。
+          建议定期使用「数据备份」保存一份副本。
         </p>
-      </div>
+
+      </section>
 
     </div>
 
     ${bottomNav("profile")}
   `;
 
+
+  /* =====================================
+     BACKUP
+  ====================================== */
+
   $("#backup-data").onclick =
-    () =>
-      store.exportBackup();
+    () => store.exportBackup();
+
+
+  /* =====================================
+     RESTORE
+  ====================================== */
 
   $("#restore-file").onchange =
     async event => {
+
       const file =
         event.target.files?.[0];
 
       if (!file) return;
 
       try {
-        await store.importBackup(
-          file
-        );
+
+        await store.importBackup(file);
 
         alert(
           "备份恢复成功 ♡"
         );
+
       } catch {
+
         alert(
           "备份文件无法读取"
         );
+
       }
+
     };
 
-  $("#edit-profile").onclick =
+
+  /* =====================================
+     PROFILE SEARCH
+  ====================================== */
+
+  $("#profile-search").onclick =
+    () => {
+
+      currentPage = "home";
+
+      render();
+
+      setTimeout(() => {
+        $("#global-search")?.focus();
+      }, 100);
+
+    };
+
+
+  /* =====================================
+     PROFILE SETTINGS
+  ====================================== */
+
+  $("#profile-settings").onclick =
     () =>
-      openProfileModal(
-        profile
-      );
+      openProfileModal(profile);
+
 }
 
 function openProfileModal(
