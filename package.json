@@ -1,0 +1,14 @@
+{
+  "name": "fangfang-kitchen-diary",
+  "version": "1.0.0",
+  "private": true,
+  "description": "芳芳的小厨房日记 - local-first recipe journal",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^7.1.5"
+  }
+}
