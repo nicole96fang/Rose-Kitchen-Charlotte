@@ -2445,45 +2445,76 @@ function printRecipe(recipe) {
         }
 
         body {
-          margin: 0;
-          font-family:
-            -apple-system,
-            BlinkMacSystemFont,
-            "PingFang SC",
-            sans-serif;
+  margin: 0;
 
-          color: #4b5960;
+  font-family:
+    "NeedMoodNiuNiu",
+    sans-serif;
 
-          background:
-            #dcecf1;
-        }
+  color: #536b71;
+
+  background:
+    #dcecf1
+    url("${new URL(
+      "./assets/app-background.jpg",
+      location.href
+    ).href}")
+    center top /
+    cover
+    fixed
+    no-repeat;
+
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
 
         .sheet {
-          width: 210mm;
-          min-height: 297mm;
+  width: 210mm;
+  min-height: 297mm;
 
-          padding: 18mm;
+  padding: 14mm;
 
-          background:
-            linear-gradient(
-              rgba(238,248,250,.96),
-              rgba(238,248,250,.96)
-            );
+  position: relative;
 
-          position: relative;
-        }
+  background:
+    linear-gradient(
+      rgba(232, 243, 245, 0.72),
+      rgba(232, 243, 245, 0.72)
+    ),
+    url("${new URL(
+      "./assets/app-background.jpg",
+      location.href
+    ).href}");
+
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
 
         .border {
-          min-height: 261mm;
+  min-height: 269mm;
 
-          border:
-            1px solid
-            rgba(150,170,175,.35);
+  border:
+    1px solid
+    rgba(255,255,255,.78);
 
-          border-radius: 18px;
+  border-radius: 24px;
 
-          padding: 14mm;
-        }
+  padding: 13mm;
+
+  background:
+    rgba(255,255,255,.72);
+
+  box-shadow:
+    0 8px 30px
+    rgba(80,110,115,.08);
+
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
 
         h1 {
           margin: 0 0 5mm;
@@ -2596,10 +2627,33 @@ function printRecipe(recipe) {
         }
 
         @media print {
-          body {
-            background: white;
-          }
-        }
+  html,
+  body {
+    background-color: #dcecf1 !important;
+
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .sheet {
+    background:
+      linear-gradient(
+        rgba(232, 243, 245, 0.72),
+        rgba(232, 243, 245, 0.72)
+      ),
+      url("${new URL(
+        "./assets/app-background.jpg",
+        location.href
+      ).href}") !important;
+
+    background-size: cover !important;
+    background-position: center top !important;
+    background-repeat: no-repeat !important;
+
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
 
       </style>
 
