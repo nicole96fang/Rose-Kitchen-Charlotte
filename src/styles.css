@@ -3622,3 +3622,987 @@ body {
   }
 
 }
+/* =====================================================
+   MY PROFILE — JOURNAL STYLE
+   Inspired by user's reference image
+===================================================== */
+
+
+/* =====================================================
+   PROFILE PAGE
+===================================================== */
+
+.profile-page {
+  padding:
+    0
+    18px
+    145px;
+
+  min-height: 100vh;
+
+  position: relative;
+}
+
+
+/* =====================================================
+   HERO
+===================================================== */
+
+.profile-hero {
+  position: relative;
+
+  padding:
+    24px
+    4px
+    20px;
+
+  text-align: center;
+}
+
+
+.profile-topbar {
+  display: grid;
+
+  grid-template-columns:
+    72px
+    1fr
+    86px;
+
+  align-items: center;
+
+  min-height: 100px;
+}
+
+
+/* =====================================================
+   AVATAR
+===================================================== */
+
+.profile-avatar-wrap {
+  display: flex;
+
+  justify-content: center;
+}
+
+
+.profile-avatar {
+  width: 76px;
+  height: 76px;
+
+  margin: 0;
+
+  border-radius: 50%;
+
+  overflow: hidden;
+
+  border:
+    4px solid
+    rgba(255, 255, 255, 0.92);
+
+  background:
+    rgba(255, 253, 249, 0.78);
+
+  box-shadow:
+    0 6px 20px
+    rgba(90, 120, 125, 0.16);
+}
+
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+}
+
+
+/* =====================================================
+   TITLE
+===================================================== */
+
+.profile-title {
+  text-align: center;
+}
+
+
+.profile-title h1 {
+  margin: 0;
+
+  color:
+    #566c72;
+
+  font-family:
+    "Songti SC",
+    "STSong",
+    Georgia,
+    serif;
+
+  font-size: 31px;
+
+  line-height: 1.15;
+
+  font-weight: 500;
+
+  letter-spacing: 2px;
+}
+
+
+.profile-title > span {
+  display: block;
+
+  margin-top: 3px;
+
+  color:
+    #a47e6f;
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size: 9px;
+
+  letter-spacing: 4px;
+}
+
+
+.profile-title-line {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 7px;
+
+  margin-top: 7px;
+}
+
+
+.profile-title-line i {
+  width: 24px;
+  height: 1px;
+
+  display: block;
+
+  background:
+    rgba(180, 143, 124, 0.55);
+}
+
+
+.profile-title-line b {
+  color:
+    #d99e9d;
+
+  font-size: 12px;
+
+  font-weight: 400;
+}
+
+
+/* =====================================================
+   TOP TOOLS
+===================================================== */
+
+.profile-tools {
+  display: flex;
+
+  justify-content: flex-end;
+
+  gap: 7px;
+}
+
+
+.profile-tool {
+  width: 39px;
+  height: 39px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.95);
+
+  background:
+    rgba(255, 253, 249, 0.9);
+
+  color:
+    #668b98;
+
+  font-size: 21px;
+
+  box-shadow:
+    0 5px 16px
+    rgba(90, 120, 125, 0.12);
+}
+
+
+/* =====================================================
+   INTRO
+===================================================== */
+
+.profile-intro {
+  padding:
+    4px
+    0
+    4px;
+
+  text-align: center;
+}
+
+
+.profile-intro p {
+  margin:
+    0
+    0
+    3px;
+
+  color:
+    #58696e;
+
+  font-family:
+    "Songti SC",
+    "STSong",
+    serif;
+
+  font-size: 17px;
+
+  letter-spacing: 1px;
+}
+
+
+.profile-intro strong {
+  color:
+    #56696f;
+
+  font-family:
+    "Songti SC",
+    "STSong",
+    serif;
+
+  font-size: 17px;
+
+  font-weight: 400;
+
+  letter-spacing: 1px;
+}
+
+
+/* =====================================================
+   FOUR STATS
+===================================================== */
+
+.profile-stats-four {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, 1fr);
+
+  padding:
+    12px
+    5px;
+
+  margin:
+    0
+    0
+    16px;
+
+  border-radius:
+    27px;
+
+  background:
+    rgba(255, 253, 249, 0.9);
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.96);
+
+  box-shadow:
+    0 7px 24px
+    rgba(85, 110, 115, 0.12);
+
+  backdrop-filter:
+    blur(8px);
+}
+
+
+.profile-stat {
+  min-height: 94px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+
+  border-right:
+    1px solid
+    rgba(120, 150, 155, 0.18);
+}
+
+
+.profile-stat:last-child {
+  border-right: 0;
+}
+
+
+.profile-stat-icon {
+  min-height: 27px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  margin-bottom: 2px;
+
+  font-size: 21px;
+}
+
+
+.profile-stat strong {
+  display: block;
+
+  color:
+    #5f7d85;
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size: 23px;
+
+  line-height: 1.1;
+}
+
+
+.profile-stat span {
+  display: block;
+
+  margin-top: 4px;
+
+  color:
+    #8a9799;
+
+  font-size: 10px;
+
+  white-space: nowrap;
+}
+
+
+/* =====================================================
+   RECIPE OVERVIEW CARD
+===================================================== */
+
+.profile-recipe-card {
+  min-height: 190px;
+
+  display: grid;
+
+  grid-template-columns:
+    1.25fr
+    0.75fr;
+
+  align-items: center;
+
+  overflow: hidden;
+
+  margin-bottom: 15px;
+
+  padding:
+    13px
+    15px;
+
+  border-radius:
+    27px;
+
+  background:
+    rgba(255, 253, 249, 0.9);
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.95);
+
+  box-shadow:
+    0 7px 24px
+    rgba(85, 110, 115, 0.11);
+}
+
+
+.profile-recipe-art {
+  position: relative;
+
+  min-height: 155px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  font-size: 64px;
+}
+
+
+.profile-book {
+  font-size: 67px;
+
+  transform:
+    rotate(-4deg);
+}
+
+
+.profile-cat {
+  position: absolute;
+
+  right: 18%;
+
+  bottom: 15px;
+
+  font-size: 38px;
+}
+
+
+.profile-flower {
+  position: absolute;
+
+  color:
+    #d6a9a7;
+
+  font-size: 24px;
+}
+
+
+.profile-flower.flower-one {
+  left: 7%;
+
+  top: 12%;
+}
+
+
+.profile-flower.flower-two {
+  right: 5%;
+
+  top: 22%;
+
+  color:
+    #9ab5b8;
+}
+
+
+.profile-recipe-info {
+  text-align: center;
+
+  padding:
+    5px;
+}
+
+
+.profile-recipe-info > strong {
+  display: block;
+
+  color:
+    #4e5b60;
+
+  font-family:
+    Georgia,
+    serif;
+
+  font-size: 43px;
+
+  line-height: 1;
+}
+
+
+.profile-recipe-info > span {
+  display: block;
+
+  margin-top: 5px;
+
+  color:
+    #56666b;
+
+  font-size: 15px;
+
+  font-weight: 500;
+}
+
+
+.profile-recipe-info p {
+  margin:
+    14px
+    0
+    0;
+
+  color:
+    #7c8a8d;
+
+  font-family:
+    "Songti SC",
+    "STSong",
+    serif;
+
+  font-size: 12px;
+
+  line-height: 1.7;
+}
+
+
+/* =====================================================
+   BACKUP CARD
+===================================================== */
+
+.profile-backup-card {
+  margin-bottom: 15px;
+
+  padding:
+    17px
+    17px
+    13px;
+
+  border-radius:
+    27px;
+
+  background:
+    rgba(255, 253, 249, 0.91);
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.95);
+
+  box-shadow:
+    0 7px 24px
+    rgba(85, 110, 115, 0.11);
+}
+
+
+.profile-backup-text h2 {
+  margin:
+    0
+    0
+    8px;
+
+  color:
+    #4f5e63;
+
+  font-size: 16px;
+
+  font-weight: 600;
+}
+
+
+.profile-backup-text p {
+  margin: 0;
+
+  color:
+    #7d8a8d;
+
+  font-size: 11px;
+
+  line-height: 1.65;
+}
+
+
+.profile-backup-actions {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  margin-top: 14px;
+}
+
+
+.backup-icon-button {
+  width: 52px;
+  height: 42px;
+
+  border-radius: 14px;
+
+  background:
+    transparent;
+
+  font-size: 21px;
+}
+
+
+.backup-restore-button {
+  min-width: 145px;
+  height: 42px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 7px;
+
+  border-radius: 22px;
+
+  border:
+    1px solid
+    #a9c8d2;
+
+  background:
+    rgba(245, 250, 250, 0.72);
+
+  color:
+    #637e87;
+
+  font-size: 12px;
+}
+
+
+.backup-restore-button span {
+  font-size: 17px;
+}
+
+
+/* =====================================================
+   ABOUT
+===================================================== */
+
+.profile-about-card {
+  min-height: 88px;
+
+  display: grid;
+
+  grid-template-columns:
+    40px
+    1fr
+    55px;
+
+  align-items: center;
+
+  margin-bottom: 14px;
+
+  padding:
+    12px
+    15px;
+
+  border-radius:
+    25px;
+
+  background:
+    rgba(255, 253, 249, 0.9);
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.95);
+
+  box-shadow:
+    0 7px 24px
+    rgba(85, 110, 115, 0.1);
+}
+
+
+.profile-about-icon {
+  font-size: 25px;
+}
+
+
+.profile-about-text h2 {
+  margin: 0 0 5px;
+
+  color:
+    #4f5e63;
+
+  font-size: 16px;
+}
+
+
+.profile-about-text p {
+  margin: 0;
+
+  color:
+    #7f8c8f;
+
+  font-size: 10px;
+
+  line-height: 1.5;
+}
+
+
+.profile-about-art {
+  text-align: center;
+
+  font-size: 32px;
+}
+
+
+/* =====================================================
+   QUOTE
+===================================================== */
+
+.profile-quote {
+  width: fit-content;
+
+  margin:
+    5px
+    auto
+    12px;
+
+  padding:
+    8px
+    22px;
+
+  border-radius:
+    999px;
+
+  color:
+    #a27f70;
+
+  background:
+    rgba(255, 253, 249, 0.72);
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.85);
+
+  font-family:
+    "Songti SC",
+    "STSong",
+    serif;
+
+  font-size: 11px;
+
+  letter-spacing: 1px;
+}
+
+
+/* =====================================================
+   LOCAL SAVE
+===================================================== */
+
+.profile-local-save {
+  margin:
+    4px
+    4px
+    18px;
+
+  padding:
+    10px
+    8px;
+
+  text-align: center;
+}
+
+
+.profile-local-save strong {
+  color:
+    #71909a;
+
+  font-size: 12px;
+}
+
+
+.profile-local-save p {
+  margin:
+    5px
+    0
+    0;
+
+  color:
+    #94a1a3;
+
+  font-size: 9px;
+
+  line-height: 1.5;
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 480px) {
+
+  .profile-page {
+    padding:
+      0
+      12px
+      145px;
+  }
+
+
+  .profile-hero {
+    padding:
+      17px
+      2px
+      17px;
+  }
+
+
+  .profile-topbar {
+    grid-template-columns:
+      66px
+      1fr
+      78px;
+
+    min-height: 88px;
+  }
+
+
+  .profile-avatar {
+    width: 70px;
+    height: 70px;
+  }
+
+
+  .profile-title h1 {
+    font-size: 29px;
+  }
+
+
+  .profile-title > span {
+    font-size: 8px;
+
+    letter-spacing: 3px;
+  }
+
+
+  .profile-tool {
+    width: 37px;
+    height: 37px;
+
+    font-size: 20px;
+  }
+
+
+  .profile-intro p,
+  .profile-intro strong {
+    font-size: 16px;
+  }
+
+
+  .profile-stats-four {
+    padding:
+      8px
+      3px;
+
+    border-radius: 25px;
+  }
+
+
+  .profile-stat {
+    min-height: 88px;
+  }
+
+
+  .profile-stat-icon {
+    font-size: 18px;
+  }
+
+
+  .profile-stat strong {
+    font-size: 21px;
+  }
+
+
+  .profile-stat span {
+    font-size: 9px;
+  }
+
+
+  .profile-recipe-card {
+    min-height: 165px;
+
+    grid-template-columns:
+      1.15fr
+      0.85fr;
+
+    padding:
+      10px;
+  }
+
+
+  .profile-recipe-art {
+    min-height: 135px;
+  }
+
+
+  .profile-book {
+    font-size: 56px;
+  }
+
+
+  .profile-cat {
+    font-size: 31px;
+
+    right: 13%;
+
+    bottom: 12px;
+  }
+
+
+  .profile-recipe-info > strong {
+    font-size: 38px;
+  }
+
+
+  .profile-recipe-info > span {
+    font-size: 13px;
+  }
+
+
+  .profile-recipe-info p {
+    margin-top: 10px;
+
+    font-size: 10px;
+  }
+
+
+  .profile-backup-card,
+  .profile-about-card {
+    border-radius: 24px;
+  }
+
+
+  .profile-backup-text h2 {
+    font-size: 15px;
+  }
+
+
+  .profile-backup-text p {
+    font-size: 10px;
+  }
+
+
+  .backup-restore-button {
+    min-width: 135px;
+
+    font-size: 11px;
+  }
+
+
+  .profile-about-card {
+    grid-template-columns:
+      34px
+      1fr
+      48px;
+  }
+
+
+  .profile-about-text p {
+    font-size: 9px;
+  }
+
+
+  .profile-about-art {
+    font-size: 28px;
+  }
+
+}
