@@ -53,7 +53,7 @@ body {
       rgba(222, 237, 241, 0.9),
       rgba(222, 237, 241, 0.9)
     ),
-    url("/assets/app-background.jpg");
+    url("../assets/app-background.jpg");
 
   background-size: cover;
   background-position: center top;
