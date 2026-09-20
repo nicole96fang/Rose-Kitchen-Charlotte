@@ -2399,23 +2399,731 @@ function bottomNav(active = "") {
 // ==================================================
 
 function printRecipe(recipe) {
-  const cat =
-    category(
-      recipe.categoryId
-    );
+  const cat = category(recipe.categoryId);
 
-  const printWindow =
-    window.open(
-      "",
-      "_blank"
-    );
+  const printWindow = window.open("", "_blank");
 
   if (!printWindow) {
-    alert(
-      "请允许浏览器打开打印页面"
-    );
+    alert("请允许浏览器打开打印页面");
     return;
   }
+
+  // 使用 GitHub Pages 当前网站地址，避免字体/图片路径错误
+  const baseURL = window.location.href;
+
+  const backgroundURL = new URL(
+    "./assets/app-background.jpg",
+    baseURL
+  ).href;
+
+  const fontURL = new URL(
+    "./assets/fonts/泥木扭扭体NeedMood NiuNiu.ttf",
+    baseURL
+  ).href;
+
+  printWindow.document.write(`
+<!doctype html>
+<html lang="zh-CN">
+
+<head>
+<meta charset="UTF-8">
+
+<meta
+  name="viewport"
+  content="width=device-width, initial-scale=1"
+/>
+
+<title>
+  ${escapeHTML(recipe.title || "我的食谱")}
+</title>
+
+<style>
+
+@font-face {
+  font-family: "NeedMoodNiuNiu";
+
+  src:
+    url("${fontURL}")
+    format("truetype");
+
+  font-style: normal;
+  font-weight: 100 900;
+
+  font-display: block;
+}
+
+
+/* =====================================================
+   GLOBAL FONT
+   整个打印页面全部使用泥木扭扭体
+===================================================== */
+
+html,
+body,
+* {
+  font-family:
+    "NeedMoodNiuNiu",
+    sans-serif !important;
+}
+
+
+/* =====================================================
+   A4
+===================================================== */
+
+@page {
+  size: A4;
+  margin: 0;
+}
+
+
+* {
+  box-sizing: border-box;
+}
+
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+
+  background: #dcecef;
+
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+
+body {
+  color: #536b71;
+}
+
+
+/* =====================================================
+   A4 SHEET
+===================================================== */
+
+.sheet {
+
+  position: relative;
+
+  width: 210mm;
+  min-height: 297mm;
+
+  overflow: hidden;
+
+  padding: 13mm;
+
+  page-break-after: always;
+
+}
+
+
+/* =====================================================
+   APP BACKGROUND
+   直接用图片，不使用 CSS background
+   iPhone 打印预览更稳定
+===================================================== */
+
+.page-background {
+
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  object-position: center top;
+
+  z-index: 0;
+
+}
+
+
+/* =====================================================
+   CONTENT CARD
+===================================================== */
+
+.content-card {
+
+  position: relative;
+
+  z-index: 2;
+
+  min-height: 271mm;
+
+  padding: 12mm;
+
+  border-radius: 27px;
+
+  background:
+    rgba(255,255,255,.78);
+
+  border:
+    1px solid
+    rgba(255,255,255,.92);
+
+  box-shadow:
+    0 8px 28px
+    rgba(80,110,115,.10);
+
+}
+
+
+/* =====================================================
+   TOP DECORATION
+===================================================== */
+
+.top-decoration {
+
+  text-align: center;
+
+  color: #b99b82;
+
+  font-size: 11px;
+
+  letter-spacing: 4px;
+
+  margin-bottom: 5mm;
+
+}
+
+
+.top-decoration::before {
+
+  content: "♡";
+
+  display: block;
+
+  font-size: 20px;
+
+  color: #d9a7aa;
+
+  margin-bottom: 2mm;
+
+}
+
+
+/* =====================================================
+   CATEGORY
+===================================================== */
+
+.category {
+
+  text-align: center;
+
+  color: #91a9ad;
+
+  font-size: 13px;
+
+  margin-bottom: 3mm;
+
+}
+
+
+/* =====================================================
+   TITLE
+===================================================== */
+
+h1 {
+
+  margin:
+
+    0
+
+    0
+
+    6mm;
+
+  text-align: center;
+
+  color: #8b7355;
+
+  font-size: 28px;
+
+  line-height: 1.35;
+
+  font-weight: 600;
+
+}
+
+
+/* =====================================================
+   INTRO
+===================================================== */
+
+.intro {
+
+  text-align: center;
+
+  color: #71878b;
+
+  font-size: 14px;
+
+  line-height: 1.8;
+
+  margin-bottom: 7mm;
+
+}
+
+
+/* =====================================================
+   COVER PHOTO
+===================================================== */
+
+.cover-wrap {
+
+  width: 100%;
+
+  margin-bottom: 7mm;
+
+  text-align: center;
+
+}
+
+
+.cover {
+
+  display: block;
+
+  width: 100%;
+
+  max-height: 75mm;
+
+  object-fit: contain;
+
+  object-position: center;
+
+  border-radius: 18px;
+
+}
+
+
+/* =====================================================
+   INFORMATION
+===================================================== */
+
+.info-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 9mm;
+
+  margin-top: 5mm;
+
+}
+
+
+.info-box {
+
+  min-width: 0;
+
+}
+
+
+h2 {
+
+  margin:
+
+    0
+
+    0
+
+    3mm;
+
+  padding-bottom: 2.5mm;
+
+  color: #7c979b;
+
+  font-size: 17px;
+
+  font-weight: 600;
+
+  border-bottom:
+    1px solid
+    rgba(125,157,162,.35);
+
+}
+
+
+p {
+
+  margin: 2mm 0;
+
+  font-size: 13px;
+
+  line-height: 1.7;
+
+}
+
+
+ul,
+ol {
+
+  margin:
+
+    2mm
+
+    0
+
+    0
+
+    5mm;
+
+  padding-left: 6mm;
+
+}
+
+
+li {
+
+  margin: 2.5mm 0;
+
+  font-size: 13px;
+
+  line-height: 1.65;
+
+}
+
+
+/* =====================================================
+   STEPS
+===================================================== */
+
+.steps {
+
+  margin-top: 7mm;
+
+}
+
+
+/* =====================================================
+   PHOTOS
+===================================================== */
+
+.photo-section {
+
+  margin-top: 7mm;
+
+}
+
+
+.photo-grid {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
+  gap: 4mm;
+
+  margin-top: 4mm;
+
+}
+
+
+.photo-grid img {
+
+  display: block;
+
+  width: 100%;
+
+  height: 38mm;
+
+  object-fit: cover;
+
+  border-radius: 12px;
+
+}
+
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+.footer {
+
+  margin-top: 10mm;
+
+  padding-top: 5mm;
+
+  text-align: center;
+
+  color: #b49b7a;
+
+  font-size: 12px;
+
+  letter-spacing: 1px;
+
+}
+
+
+.footer::before {
+
+  content: "♡";
+
+  margin-right: 4px;
+
+  color: #d9a7aa;
+
+}
+
+
+/* =====================================================
+   PRINT
+===================================================== */
+
+@media print {
+
+  html,
+  body {
+
+    background:
+      #dcecef !important;
+
+    -webkit-print-color-adjust:
+      exact !important;
+
+    print-color-adjust:
+      exact !important;
+
+  }
+
+  .sheet {
+
+    width: 210mm;
+    min-height: 297mm;
+
+    page-break-after: always;
+
+  }
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+  <section class="sheet">
+
+    <!-- App 原本的水彩背景 -->
+    <img
+      class="page-background"
+      src="${backgroundURL}"
+      alt=""
+    >
+
+
+    <div class="content-card">
+
+      <div class="top-decoration">
+        MY LITTLE KITCHEN
+      </div>
+
+
+      <div class="category">
+        ${escapeHTML(cat?.name || "")}
+      </div>
+
+
+      <h1>
+        ${escapeHTML(
+          recipe.title || "我的食谱"
+        )}
+      </h1>
+
+
+      ${
+        recipe.intro
+          ? `
+            <div class="intro">
+              ${escapeHTML(recipe.intro)}
+            </div>
+          `
+          : ""
+      }
+
+
+      ${
+        recipe.cover
+          ? `
+            <div class="cover-wrap">
+              <img
+                class="cover"
+                src="${recipe.cover}"
+                alt=""
+              >
+            </div>
+          `
+          : ""
+      }
+
+
+      <div class="info-grid">
+
+        <section class="info-box">
+
+          <h2>
+            食材
+          </h2>
+
+          <ul>
+
+            ${
+              (recipe.ingredients || [])
+                .map(
+                  item => `
+                    <li>
+                      ${escapeHTML(
+                        item.name || ""
+                      )}
+
+                      ${
+                        item.amount
+                          ? `
+                            — ${escapeHTML(
+                              item.amount
+                            )}
+                          `
+                          : ""
+                      }
+                    </li>
+                  `
+                )
+                .join("")
+            }
+
+          </ul>
+
+        </section>
+
+
+        <section class="info-box">
+
+          <h2>
+            份量 / 时间
+          </h2>
+
+          <p>
+            份量：
+            ${escapeHTML(
+              recipe.servings || "—"
+            )}
+          </p>
+
+          <p>
+            时间：
+            ${escapeHTML(
+              recipe.time || "—"
+            )}
+          </p>
+
+        </section>
+
+      </div>
+
+
+      <section class="steps">
+
+        <h2>
+          烹饪步骤
+        </h2>
+
+        <ol>
+
+          ${
+            (recipe.steps || [])
+              .map(
+                step => `
+                  <li>
+                    ${escapeHTML(
+                      step.text || ""
+                    )}
+                  </li>
+                `
+              )
+              .join("")
+          }
+
+        </ol>
+
+      </section>
+
+
+      ${
+        recipe.photos?.length
+          ? `
+            <section class="photo-section">
+
+              <h2>
+                制作记录
+              </h2>
+
+              <div class="photo-grid">
+
+                ${recipe.photos
+                  .map(
+                    photo => `
+                      <img
+                        src="${photo}"
+                        alt=""
+                      >
+                    `
+                  )
+                  .join("")}
+
+              </div>
+
+            </section>
+          `
+          : ""
+      }
+
+
+      <div class="footer">
+        芳芳的小厨房日记
+      </div>
+
+    </div>
+
+  </section>
+
+
+<script>
+
+/*
+ * 等字体真正加载完成以后
+ * 再打开打印预览
+ */
+
+document.fonts.ready.then(() => {
+
+  setTimeout(() => {
+
+    window.print();
+
+  }, 500);
+
+});
+
+</script>
+
+</body>
+
+</html>
+  `);
+
+  printWindow.document.close();
+}
 
   printWindow.document.write(`
     <!doctype html>
