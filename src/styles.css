@@ -3601,3 +3601,24 @@ body {
   }
 
 }
+/* =====================================================
+   FINAL MOBILE SPACE FIX
+   Prevent bottom navigation from covering categories
+===================================================== */
+
+@media (max-width: 480px) {
+
+  .home-page {
+    padding-bottom: 155px !important;
+  }
+
+  .bottom-nav {
+    bottom: 10px !important;
+  }
+
+  /* 让最后几张分类卡可以完整滚到导航栏上方 */
+  .home-category-section {
+    padding-bottom: 20px;
+  }
+
+}
