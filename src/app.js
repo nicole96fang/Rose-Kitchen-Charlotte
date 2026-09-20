@@ -2507,10 +2507,11 @@ body {
   position: relative;
   width: 210mm;
   height: 297mm;
+  min-height: 297mm;
   overflow: hidden;
-  padding: 10mm;
-  page-break-after: auto;
-  break-after: auto;
+  padding: 7mm;
+  page-break-after: always;
+  break-after: page;
 }
 
 
@@ -2544,16 +2545,17 @@ body {
 ===================================================== */
 
 .content-card {
-
   position: relative;
-
   z-index: 2;
 
-  min-height: 277mm;
+  height: 283mm;
+  min-height: 0;
 
-padding: 13mm;
+  padding: 9mm;
 
-border-radius: 30px;
+  border-radius: 30px;
+
+  overflow: hidden;
 
 background:
   rgba(255,255,255,.88);
@@ -2687,7 +2689,7 @@ h1 {
 
   width: 100%;
 
-  max-height: 75mm;
+  max-height: 48mm;
 
   object-fit: contain;
 
@@ -2709,9 +2711,8 @@ h1 {
   grid-template-columns:
     1fr 1fr;
 
-  gap: 9mm;
-
-  margin-top: 5mm;
+  gap: 6mm;
+margin-top: 3mm;
 
 }
 
@@ -2794,7 +2795,7 @@ li {
 
 .steps {
 
-  margin-top: 7mm;
+  margin-top: 4mm;
 
 }
 
@@ -2805,7 +2806,7 @@ li {
 
 .photo-section {
 
-  margin-top: 7mm;
+  margin-top: 4mm;
 
 }
 
@@ -2830,7 +2831,7 @@ li {
 
   width: 100%;
 
-  height: 38mm;
+  height: 27mm;
 
   object-fit: cover;
 
@@ -2845,9 +2846,8 @@ li {
 
 .footer {
 
-  margin-top: 10mm;
-
-  padding-top: 5mm;
+  margin-top: 4mm;
+padding-top: 2mm;
 
   text-align: center;
 
