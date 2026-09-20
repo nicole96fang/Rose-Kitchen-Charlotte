@@ -1882,18 +1882,22 @@ function renderProfile(state) {
       <section class="profile-header">
 
         <div class="profile-avatar">
-          ${
-            profile.avatar
-              ? `
-                <img
-                  src="${profile.avatar}"
-                />
-              `
-              : `
-                <span>🌸</span>
-              `
-          }
-        </div>
+  ${
+    profile.avatar
+      ? `
+        <img
+          src="${profile.avatar}"
+          alt="My Kitchen Rose"
+        />
+      `
+      : `
+        <img
+          src="./assets/avatar-profile.png"
+          alt="My Kitchen Rose"
+        />
+      `
+  }
+</div>
 
         <p>My Kitchen</p>
 
