@@ -2510,8 +2510,6 @@ body {
   min-height: 297mm;
   overflow: hidden;
   padding: 7mm;
-  page-break-after: always;
-  break-after: page;
 }
 
 
@@ -2896,7 +2894,6 @@ padding-top: 2mm;
     width: 210mm;
     min-height: 297mm;
 
-    page-break-after: always;
 
   }
 
