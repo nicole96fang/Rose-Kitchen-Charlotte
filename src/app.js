@@ -169,16 +169,19 @@ function renderHome(state) {
     state.profile || {};
 
   const avatarHTML =
-    profile.avatar
-      ? `
-        <img
-          src="${profile.avatar}"
-          alt=""
-        />
-      `
-      : `
-        <span>🌸</span>
-      `;
+  profile.avatar
+    ? `
+      <img
+        src="${profile.avatar}"
+        alt=""
+      />
+    `
+    : `
+      <img
+        src="./assets/avatar-profile.png"
+        alt="My Kitchen Rose"
+      />
+    `;
 
   app.innerHTML = `
     <div class="page home-page">
