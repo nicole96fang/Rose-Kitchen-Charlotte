@@ -2505,11 +2505,25 @@ body {
 
 .sheet {
   position: relative;
+
   width: 210mm;
   height: 297mm;
+
+  min-width: 210mm;
+  max-width: 210mm;
+
   min-height: 297mm;
+  max-height: 297mm;
+
   overflow: hidden;
+
   padding: 7mm;
+
+  page-break-after: auto !important;
+  break-after: auto !important;
+  page-break-before: auto !important;
+  break-before: auto !important;
+  break-inside: avoid !important;
 }
 
 
@@ -2546,26 +2560,25 @@ body {
   position: relative;
   z-index: 2;
 
-  height: 283mm;
-  min-height: 0;
+  width: 100%;
 
-  padding: 9mm;
+  height: 283mm;
+  min-height: 283mm;
+  max-height: 283mm;
+
+  padding: 8mm;
 
   border-radius: 30px;
 
   overflow: hidden;
 
-background:
-  rgba(255,255,255,.88);
+  background: rgba(255,255,255,.88);
 
-  border:
-    1px solid
-    rgba(255,255,255,.92);
+  border: 1px solid rgba(255,255,255,.92);
 
   box-shadow:
     0 8px 28px
     rgba(80,110,115,.10);
-
 }
 
 
@@ -2810,31 +2823,38 @@ li {
 
 
 .photo-grid {
-
   display: grid;
 
   grid-template-columns:
     repeat(3, 1fr);
 
-  gap: 4mm;
+  gap: 3mm;
 
-  margin-top: 4mm;
+  margin-top: 3mm;
 
+  max-height: 36mm;
+
+  overflow: hidden;
 }
 
 
 .photo-grid img {
-
   display: block;
 
   width: 100%;
+  height: auto;
 
-  height: 27mm;
+  max-height: 32mm;
 
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
 
   border-radius: 12px;
 
+  background: rgba(236,244,244,.35);
+
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 
 
@@ -2890,12 +2910,19 @@ padding-top: 2mm;
   }
 
   .sheet {
+  width: 210mm;
+  height: 297mm;
 
-    width: 210mm;
-    min-height: 297mm;
+  min-height: 297mm;
+  max-height: 297mm;
 
+  overflow: hidden;
 
-  }
+  page-break-after: auto !important;
+  break-after: auto !important;
+  page-break-before: auto !important;
+  break-before: auto !important;
+}
 
 }
 
