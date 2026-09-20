@@ -5068,3 +5068,34 @@ body {
     object-fit: contain !important;
   }
 }
+/* =====================================================
+   PROFILE — KEEP ABOUT SECTION ABOVE BOTTOM NAV
+===================================================== */
+
+.profile-page {
+  padding-bottom: 300px !important;
+}
+
+.profile-about-card {
+  position: relative;
+  z-index: 5;
+  margin-bottom: 22px !important;
+}
+
+.profile-quote {
+  position: relative;
+  z-index: 5;
+  margin-bottom: 22px !important;
+}
+
+.profile-local-save {
+  position: relative;
+  z-index: 5;
+  padding-bottom: 30px !important;
+}
+
+@media (max-width: 480px) {
+  .profile-page {
+    padding-bottom: 300px !important;
+  }
+}
