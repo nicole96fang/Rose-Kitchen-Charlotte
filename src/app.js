@@ -2399,27 +2399,35 @@ function bottomNav(active = "") {
 // ==================================================
 
 function printRecipe(recipe) {
-  const cat = category(recipe.categoryId);
+
+  const cat =
+    category(recipe.categoryId);
+
 
   // ==================================================
-  // PHOTO DATA
+  // PHOTOS
   // ==================================================
 
-  const photos = recipe.photos || [];
+  const photos =
+    recipe.photos || [];
+
 
   const coverPhoto =
     recipe.cover ||
     photos[0] ||
     "";
 
-  // 找出封面照片在 photos 里的位置
-  const coverIndex = coverPhoto
-    ? photos.findIndex(
-        photo => photo === coverPhoto
-      )
-    : -1;
 
-  // 制作记录不再重复显示封面
+  const coverIndex =
+    coverPhoto
+      ? photos.findIndex(
+          photo =>
+            photo === coverPhoto
+        )
+      : -1;
+
+
+  // 封面不再重复出现在制作记录
   const galleryPhotos =
     coverIndex >= 0
       ? photos.filter(
@@ -2439,7 +2447,9 @@ function printRecipe(recipe) {
       "_blank"
     );
 
+
   if (!printWindow) {
+
     alert(
       "请允许浏览器打开打印页面"
     );
@@ -2449,9 +2459,7 @@ function printRecipe(recipe) {
 
 
   // ==================================================
-  // IMPORTANT:
-  // GitHub Pages 当前网站地址
-  // 确保 background / font 不会消失
+  // IMPORTANT PATHS
   // ==================================================
 
   const baseURL =
@@ -2473,36 +2481,217 @@ function printRecipe(recipe) {
 
 
   // ==================================================
-  // PRINT HTML
+  // ESCAPED CONTENT
+  // ==================================================
+
+  const safeTitle =
+    escapeHTML(
+      recipe.title ||
+      "我的食谱"
+    );
+
+
+  const safeCategory =
+    escapeHTML(
+      cat?.name ||
+      ""
+    );
+
+
+  const safeIntro =
+    escapeHTML(
+      recipe.intro ||
+      ""
+    );
+
+
+  const safeServings =
+    escapeHTML(
+      recipe.servings ||
+      "—"
+    );
+
+
+  const safeTime =
+    escapeHTML(
+      recipe.time ||
+      "—"
+    );
+
+
+  // ==================================================
+  // INGREDIENTS
+  // ==================================================
+
+  const ingredientsHTML =
+    (recipe.ingredients || [])
+      .map(
+        item => `
+          <li>
+
+            ${escapeHTML(
+              item.name ||
+              ""
+            )}
+
+            ${
+              item.amount
+                ? `
+                  — ${escapeHTML(
+                    item.amount
+                  )}
+                `
+                : ""
+            }
+
+          </li>
+        `
+      )
+      .join("");
+
+
+  // ==================================================
+  // STEPS
+  //
+  // 每一个步骤都是独立 block。
+  // 内容太多时可以自然进入下一页。
+  // ==================================================
+
+  const stepsHTML =
+    (recipe.steps || [])
+      .map(
+        (step, index) => `
+          <div
+            class="step-item print-block"
+          >
+
+            <span class="step-index">
+              ${index + 1}
+            </span>
+
+            <div class="step-text">
+
+              ${escapeHTML(
+                step.text ||
+                ""
+              )}
+
+            </div>
+
+          </div>
+        `
+      )
+      .join("");
+
+
+  // ==================================================
+  // PHOTO ROWS
+  //
+  // 两张照片为一组。
+  //
+  // 这样：
+  //
+  // ❌ 不会出现左边照片在第一页、
+  //    右边照片被挤到第二页
+  //
+  // ❌ 不会切一半
+  //
+  // ✅ 整行一起移动
+  // ==================================================
+
+  const photoRows = [];
+
+
+  for (
+    let i = 0;
+    i < galleryPhotos.length;
+    i += 2
+  ) {
+
+    const first =
+      galleryPhotos[i];
+
+
+    const second =
+      galleryPhotos[i + 1];
+
+
+    photoRows.push(`
+
+      <div
+        class="photo-row print-block"
+      >
+
+        <div class="photo-box">
+
+          <img
+            src="${first}"
+            alt=""
+          >
+
+        </div>
+
+
+        ${
+          second
+            ? `
+              <div class="photo-box">
+
+                <img
+                  src="${second}"
+                  alt=""
+                >
+
+              </div>
+            `
+            : `
+              <div
+                class="photo-box photo-empty"
+              ></div>
+            `
+        }
+
+      </div>
+
+    `);
+
+  }
+
+
+  // ==================================================
+  // WRITE PRINT DOCUMENT
   // ==================================================
 
   printWindow.document.write(`
+
 <!doctype html>
 
 <html lang="zh-CN">
+
 
 <head>
 
 <meta charset="UTF-8">
 
+
 <meta
   name="viewport"
-  content="width=device-width, initial-scale=1"
-/>
+  content="
+    width=device-width,
+    initial-scale=1
+  "
+>
+
 
 <title>
-  ${escapeHTML(
-    recipe.title ||
-    "我的食谱"
-  )}
+  ${safeTitle}
 </title>
 
 
 <style>
 
 /* =====================================================
-   CUSTOM FONT
-   保留你 App 原本使用的字体
+   FONT
 ===================================================== */
 
 @font-face {
@@ -2522,12 +2711,9 @@ function printRecipe(recipe) {
 
   font-display:
     block;
+
 }
 
-
-/* =====================================================
-   GLOBAL FONT
-===================================================== */
 
 html,
 body,
@@ -2547,8 +2733,7 @@ body,
 @page {
 
   size:
-    210mm
-    297mm;
+    A4;
 
   margin:
     0;
@@ -2557,7 +2742,7 @@ body,
 
 
 /* =====================================================
-   GLOBAL
+   RESET
 ===================================================== */
 
 * {
@@ -2580,6 +2765,9 @@ body {
   background:
     #dcecef;
 
+  color:
+    #536b71;
+
   -webkit-print-color-adjust:
     exact !important;
 
@@ -2589,24 +2777,23 @@ body {
 }
 
 
-body {
+/* =====================================================
+   PRINT DOCUMENT
+===================================================== */
 
-  color:
-    #536b71;
+#print-root {
+
+  width:
+    100%;
 
 }
 
 
 /* =====================================================
-   A4 SHEET
-
-   IMPORTANT:
-   这里故意使用 296.8mm
-   不使用 297mm
-   防止 Safari / iPhone 多出空白第二页
+   EVERY A4 PAGE
 ===================================================== */
 
-.sheet {
+.print-page {
 
   position:
     relative;
@@ -2615,49 +2802,45 @@ body {
     210mm;
 
   height:
-    296.8mm;
-
-  min-width:
-    210mm;
-
-  max-width:
-    210mm;
+    296.5mm;
 
   min-height:
-    296.8mm;
+    296.5mm;
 
   max-height:
-    296.8mm;
-
-  overflow:
-    hidden;
+    296.5mm;
 
   padding:
     7mm;
 
-  page-break-after:
-    auto !important;
+  overflow:
+    hidden;
 
   break-after:
-    auto !important;
+    page;
 
-  page-break-before:
-    auto !important;
+  page-break-after:
+    always;
 
-  break-before:
-    auto !important;
+}
 
-  break-inside:
-    avoid !important;
+
+/* 最后一页不要强制再产生一页 */
+
+.print-page:last-child {
+
+  break-after:
+    auto;
+
+  page-break-after:
+    auto;
 
 }
 
 
 /* =====================================================
-   APP BACKGROUND
-
-   使用图片，不使用 CSS background
-   iPhone Safari 打印会更加稳定
+   BACKGROUND
+   每一页都有自己的完整水彩背景
 ===================================================== */
 
 .page-background {
@@ -2681,7 +2864,7 @@ body {
     center top;
 
   opacity:
-    0.72;
+    .72;
 
   z-index:
     0;
@@ -2690,7 +2873,7 @@ body {
 
 
 /* =====================================================
-   CONTENT CARD
+   WHITE CONTENT CARD
 ===================================================== */
 
 .content-card {
@@ -2704,13 +2887,7 @@ body {
   width:
     100%;
 
-  height:
-    282mm;
-
   min-height:
-    282mm;
-
-  max-height:
     282mm;
 
   padding:
@@ -2718,9 +2895,6 @@ body {
 
   border-radius:
     30px;
-
-  overflow:
-    hidden;
 
   background:
     rgba(
@@ -2736,7 +2910,7 @@ body {
       255,
       255,
       255,
-      .92
+      .94
     );
 
   box-shadow:
@@ -2752,10 +2926,10 @@ body {
 
 
 /* =====================================================
-   TOP DECORATION
+   PAGE HEADER
 ===================================================== */
 
-.top-decoration {
+.page-heading {
 
   text-align:
     center;
@@ -2775,7 +2949,7 @@ body {
 }
 
 
-.top-decoration::before {
+.page-heading::before {
 
   content:
     "♡";
@@ -2783,11 +2957,11 @@ body {
   display:
     block;
 
-  font-size:
-    20px;
-
   color:
     #d9a7aa;
+
+  font-size:
+    20px;
 
   margin-bottom:
     2mm;
@@ -2808,7 +2982,7 @@ body {
     #91a9ad;
 
   font-size:
-    15px;
+    14px;
 
   margin-bottom:
     3mm;
@@ -2823,9 +2997,7 @@ body {
 h1 {
 
   margin:
-    0
-    0
-    6mm;
+    0 0 5mm;
 
   text-align:
     center;
@@ -2834,7 +3006,7 @@ h1 {
     #8b7355;
 
   font-size:
-    32px;
+    30px;
 
   line-height:
     1.35;
@@ -2861,7 +3033,7 @@ h1 {
     14px;
 
   line-height:
-    1.8;
+    1.7;
 
   margin-bottom:
     5mm;
@@ -2870,7 +3042,7 @@ h1 {
 
 
 /* =====================================================
-   COVER PHOTO
+   COVER
 ===================================================== */
 
 .cover-wrap {
@@ -2878,11 +3050,17 @@ h1 {
   width:
     100%;
 
+  text-align:
+    center;
+
   margin-bottom:
     5mm;
 
-  text-align:
-    center;
+  break-inside:
+    avoid;
+
+  page-break-inside:
+    avoid;
 
 }
 
@@ -2896,7 +3074,7 @@ h1 {
     100%;
 
   max-height:
-    42mm;
+    43mm;
 
   object-fit:
     contain;
@@ -2911,7 +3089,7 @@ h1 {
 
 
 /* =====================================================
-   INFORMATION
+   INFO
 ===================================================== */
 
 .info-grid {
@@ -2928,6 +3106,12 @@ h1 {
   margin-top:
     3mm;
 
+  break-inside:
+    avoid;
+
+  page-break-inside:
+    avoid;
+
 }
 
 
@@ -2942,9 +3126,7 @@ h1 {
 h2 {
 
   margin:
-    0
-    0
-    3mm;
+    0 0 3mm;
 
   padding-bottom:
     2.5mm;
@@ -2953,7 +3135,7 @@ h2 {
     #7c979b;
 
   font-size:
-    19px;
+    18px;
 
   font-weight:
     600;
@@ -2970,36 +3152,32 @@ h2 {
 }
 
 
-p {
+ul {
 
   margin:
-    2mm 0;
-
-  font-size:
-    15px;
-
-  line-height:
-    1.6;
-
-}
-
-
-ul,
-ol {
-
-  margin:
-    2mm
-    0
-    0
-    5mm;
+    2mm 0 0 5mm;
 
   padding-left:
-    6mm;
+    5mm;
 
 }
 
 
 li {
+
+  margin:
+    1.8mm 0;
+
+  font-size:
+    14px;
+
+  line-height:
+    1.45;
+
+}
+
+
+.info-box p {
 
   margin:
     2mm 0;
@@ -3008,7 +3186,7 @@ li {
     14px;
 
   line-height:
-    1.5;
+    1.6;
 
 }
 
@@ -3017,59 +3195,167 @@ li {
    STEPS
 ===================================================== */
 
-.steps {
+.steps-section {
 
   margin-top:
+    4mm;
+
+}
+
+
+.step-item {
+
+  display:
+    flex;
+
+  gap:
     3mm;
+
+  align-items:
+    flex-start;
+
+  margin:
+    2.5mm 0;
+
+  break-inside:
+    avoid;
+
+  page-break-inside:
+    avoid;
+
+}
+
+
+.step-index {
+
+  flex:
+    0 0 auto;
+
+  width:
+    7mm;
+
+  height:
+    7mm;
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  border-radius:
+    50%;
+
+  background:
+    rgba(
+      220,
+      236,
+      239,
+      .75
+    );
+
+  color:
+    #7c979b;
+
+  font-size:
+    12px;
+
+}
+
+
+.step-text {
+
+  flex:
+    1;
+
+  font-size:
+    14px;
+
+  line-height:
+    1.55;
 
 }
 
 
 /* =====================================================
-   PRODUCTION PHOTOS
+   PHOTO SECTION
 ===================================================== */
 
 .photo-section {
 
   margin-top:
-    3mm;
+    4mm;
 
 }
 
 
-.photo-grid {
+.photo-row {
 
   display:
     grid;
 
   grid-template-columns:
-    repeat(
-      2,
-      minmax(
-        0,
-        1fr
-      )
-    );
+    1fr 1fr;
 
   gap:
     4mm;
 
   margin-top:
-    3mm;
+    4mm;
 
-  height:
-    72mm;
+  break-inside:
+    avoid !important;
 
-  max-height:
-    72mm;
-
-  overflow:
-    hidden;
+  page-break-inside:
+    avoid !important;
 
 }
 
 
-.photo-grid img {
+.photo-box {
+
+  width:
+    100%;
+
+  height:
+    48mm;
+
+  display:
+    flex;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  overflow:
+    hidden;
+
+  border-radius:
+    14px;
+
+  background:
+    rgba(
+      236,
+      244,
+      244,
+      .48
+    );
+
+  break-inside:
+    avoid !important;
+
+  page-break-inside:
+    avoid !important;
+
+}
+
+
+.photo-box img {
 
   display:
     block;
@@ -3078,7 +3364,7 @@ li {
     100%;
 
   height:
-    32mm;
+    100%;
 
   object-fit:
     contain;
@@ -3087,21 +3373,21 @@ li {
     center;
 
   border-radius:
-    12px;
-
-  background:
-    rgba(
-      236,
-      244,
-      244,
-      .35
-    );
+    14px;
 
   break-inside:
-    avoid;
+    avoid !important;
 
   page-break-inside:
-    avoid;
+    avoid !important;
+
+}
+
+
+.photo-empty {
+
+  visibility:
+    hidden;
 
 }
 
@@ -3113,7 +3399,7 @@ li {
 .footer {
 
   margin-top:
-    3mm;
+    5mm;
 
   padding-top:
     2mm;
@@ -3125,7 +3411,7 @@ li {
     #b49b7a;
 
   font-size:
-    12px;
+    11px;
 
   letter-spacing:
     1px;
@@ -3133,31 +3419,17 @@ li {
 }
 
 
-.footer::before {
-
-  content:
-    "♡";
-
-  margin-right:
-    4px;
-
-  color:
-    #d9a7aa;
-
-}
-
-
 /* =====================================================
-   PRINT MEDIA
-
-   注意：
-   这里绝对不能再写 297mm
+   PRINT
 ===================================================== */
 
 @media print {
 
   html,
   body {
+
+    width:
+      210mm;
 
     background:
       #dcecef !important;
@@ -3171,34 +3443,54 @@ li {
   }
 
 
-  .sheet {
+  .print-page {
 
     width:
       210mm;
 
     height:
-      296.8mm;
+      296.5mm;
 
     min-height:
-      296.8mm;
+      296.5mm;
 
     max-height:
-      296.8mm;
+      296.5mm;
 
     overflow:
       hidden;
 
-    page-break-after:
-      auto !important;
+  }
 
-    break-after:
-      auto !important;
+}
 
-    page-break-before:
-      auto !important;
 
-    break-before:
-      auto !important;
+/* =====================================================
+   SCREEN PREVIEW
+===================================================== */
+
+@media screen {
+
+  body {
+
+    background:
+      #dcecef;
+
+  }
+
+  .print-page {
+
+    margin:
+      10px auto;
+
+    box-shadow:
+      0 5px 30px
+      rgba(
+        0,
+        0,
+        0,
+        .12
+      );
 
   }
 
@@ -3212,331 +3504,707 @@ li {
 <body>
 
 
-<section class="sheet">
+<div id="print-root">
 
 
   <!-- =================================================
-       ORIGINAL APP BACKGROUND
+       FIRST PAGE
+       JS 会自动把内容分页
   ================================================== -->
 
-  <img
-    class="page-background"
-    src="${backgroundURL}"
-    alt=""
-  >
+  <section class="print-page">
 
 
-  <div class="content-card">
+    <img
+      class="page-background"
+      src="${backgroundURL}"
+      alt=""
+    >
 
 
-    <!-- =================================================
-         HEADER
-    ================================================== -->
+    <div class="content-card">
 
-    <div class="top-decoration">
 
-      MY LITTLE KITCHEN
+      <div class="page-heading">
 
-    </div>
+        MY LITTLE KITCHEN
 
+      </div>
 
-    <!-- =================================================
-         CATEGORY
-    ================================================== -->
 
-    <div class="category">
+      <div class="category">
 
-      ${escapeHTML(
-        cat?.name || ""
-      )}
+        ${safeCategory}
 
-    </div>
+      </div>
 
 
-    <!-- =================================================
-         TITLE
-    ================================================== -->
+      <h1>
 
-    <h1>
+        ${safeTitle}
 
-      ${escapeHTML(
-        recipe.title ||
-        "我的食谱"
-      )}
+      </h1>
 
-    </h1>
 
+      ${
+        safeIntro
+          ? `
+            <div class="intro">
 
-    <!-- =================================================
-         INTRO
-    ================================================== -->
-
-    ${
-      recipe.intro
-        ? `
-          <div class="intro">
-
-            ${escapeHTML(
-              recipe.intro
-            )}
-
-          </div>
-        `
-        : ""
-    }
-
-
-    <!-- =================================================
-         COVER PHOTO
-
-         只显示一次
-    ================================================== -->
-
-    ${
-      coverPhoto
-        ? `
-          <div class="cover-wrap">
-
-            <img
-              class="cover"
-              src="${coverPhoto}"
-              alt=""
-            >
-
-          </div>
-        `
-        : ""
-    }
-
-
-    <!-- =================================================
-         INGREDIENTS / INFO
-    ================================================== -->
-
-    <div class="info-grid">
-
-
-      <section class="info-box">
-
-        <h2>
-          食材
-        </h2>
-
-        <ul>
-
-          ${
-            (recipe.ingredients || [])
-              .map(
-                item => `
-                  <li>
-
-                    ${escapeHTML(
-                      item.name ||
-                      ""
-                    )}
-
-                    ${
-                      item.amount
-                        ? `
-                          — ${escapeHTML(
-                            item.amount
-                          )}
-                        `
-                        : ""
-                    }
-
-                  </li>
-                `
-              )
-              .join("")
-          }
-
-        </ul>
-
-      </section>
-
-
-      <section class="info-box">
-
-        <h2>
-          份量 / 时间
-        </h2>
-
-        <p>
-
-          份量：
-          ${escapeHTML(
-            recipe.servings ||
-            "—"
-          )}
-
-        </p>
-
-        <p>
-
-          时间：
-          ${escapeHTML(
-            recipe.time ||
-            "—"
-          )}
-
-        </p>
-
-      </section>
-
-
-    </div>
-
-
-    <!-- =================================================
-         COOKING STEPS
-    ================================================== -->
-
-    <section class="steps">
-
-      <h2>
-        烹饪步骤
-      </h2>
-
-      <ol>
-
-        ${
-          (recipe.steps || [])
-            .map(
-              step => `
-                <li>
-
-                  ${escapeHTML(
-                    step.text ||
-                    ""
-                  )}
-
-                </li>
-              `
-            )
-            .join("")
-        }
-
-      </ol>
-
-    </section>
-
-
-    <!-- =================================================
-         PRODUCTION RECORD
-
-         封面不会重复
-         最多显示 4 张
-         2 × 2
-    ================================================== -->
-
-    ${
-      galleryPhotos.length
-        ? `
-          <section class="photo-section">
-
-            <h2>
-              制作记录
-            </h2>
-
-            <div class="photo-grid">
-
-              ${galleryPhotos
-                .slice(0, 4)
-                .map(
-                  photo => `
-                    <img
-                      src="${photo}"
-                      alt=""
-                    >
-                  `
-                )
-                .join("")}
+              ${safeIntro}
 
             </div>
-
-          </section>
-        `
-        : ""
-    }
+          `
+          : ""
+      }
 
 
-    <!-- =================================================
-         FOOTER
-    ================================================== -->
+      ${
+        coverPhoto
+          ? `
+            <div
+              class="cover-wrap print-block"
+            >
 
-    <div class="footer">
+              <img
+                class="cover"
+                src="${coverPhoto}"
+                alt=""
+              >
 
-      芳芳的小厨房日记
+            </div>
+          `
+          : ""
+      }
+
+
+      <div
+        class="info-grid print-block"
+      >
+
+
+        <section
+          class="info-box"
+        >
+
+          <h2>
+            食材
+          </h2>
+
+          <ul>
+
+            ${ingredientsHTML}
+
+          </ul>
+
+        </section>
+
+
+        <section
+          class="info-box"
+        >
+
+          <h2>
+            份量 / 时间
+          </h2>
+
+          <p>
+
+            份量：
+            ${safeServings}
+
+          </p>
+
+          <p>
+
+            时间：
+            ${safeTime}
+
+          </p>
+
+        </section>
+
+
+      </div>
+
+
+      ${
+        stepsHTML
+          ? `
+            <section
+              class="steps-section"
+            >
+
+              <h2>
+                烹饪步骤
+              </h2>
+
+              <div
+                id="steps-container"
+              >
+
+                ${stepsHTML}
+
+              </div>
+
+            </section>
+          `
+          : ""
+      }
+
+
+      ${
+        photoRows.length
+          ? `
+            <section
+              class="photo-section"
+            >
+
+              <h2>
+                制作记录
+              </h2>
+
+              <div
+                id="photos-container"
+              >
+
+                ${photoRows.join("")}
+
+              </div>
+
+            </section>
+          `
+          : ""
+      }
+
+
+      <div class="footer">
+
+        芳芳的小厨房日记
+
+      </div>
+
 
     </div>
 
+  </section>
 
-  </div>
-
-
-</section>
+</div>
 
 
 <script>
 
-/*
- * 等待：
- *
- * 1. 泥木扭扭体字体
- * 2. background
- * 3. cover
- * 4. production photos
- *
- * 全部加载完成后才打开 Print。
- */
+/* =====================================================
+   SMART PAGINATION
+===================================================== */
 
-Promise.all([
+async function preparePrint() {
 
-  document.fonts.ready,
+  /*
+   * 等待字体
+   */
 
-  ...[
-    ...document.images
-  ].map(
-    image =>
+  try {
 
-      image.complete
+    await document.fonts.ready;
 
-        ? Promise.resolve()
+  } catch (error) {
 
-        : new Promise(
-            resolve => {
+    console.warn(
+      "Font loading warning:",
+      error
+    );
 
-              image.addEventListener(
-                "load",
-                resolve,
-                {
-                  once: true
-                }
-              );
+  }
 
-              image.addEventListener(
-                "error",
-                resolve,
-                {
-                  once: true
-                }
-              );
 
-            }
-          )
+  /*
+   * 等待所有照片
+   */
 
-  )
+  const images =
+    [
+      ...document.images
+    ];
 
-]).then(() => {
 
-  setTimeout(() => {
+  await Promise.all(
 
-    window.print();
+    images.map(
+      image => {
 
-  }, 700);
+        if (
+          image.complete
+        ) {
 
-});
+          return Promise.resolve();
+
+        }
+
+
+        return new Promise(
+          resolve => {
+
+            image.addEventListener(
+              "load",
+              resolve,
+              {
+                once: true
+              }
+            );
+
+            image.addEventListener(
+              "error",
+              resolve,
+              {
+                once: true
+              }
+            );
+
+          }
+        );
+
+      }
+    )
+
+  );
+
+
+  /*
+   * 给浏览器一点时间
+   * 完成字体和图片尺寸计算
+   */
+
+  await new Promise(
+    resolve =>
+      setTimeout(
+        resolve,
+        300
+      )
+  );
+
+
+  paginate();
+
+
+  /*
+   * 分页完成以后
+   * 再打开打印预览
+   */
+
+  setTimeout(
+    () => {
+
+      window.print();
+
+    },
+    500
+  );
+
+}
+
+
+/* =====================================================
+   PAGINATE
+===================================================== */
+
+function paginate() {
+
+  const root =
+    document.querySelector(
+      "#print-root"
+    );
+
+
+  if (!root) {
+    return;
+  }
+
+
+  const firstPage =
+    root.querySelector(
+      ".print-page"
+    );
+
+
+  if (!firstPage) {
+    return;
+  }
+
+
+  /*
+   * content-card
+   */
+
+  const card =
+    firstPage.querySelector(
+      ".content-card"
+    );
+
+
+  if (!card) {
+    return;
+  }
+
+
+  /*
+   * 把需要分页的 block
+   * 全部先取出来
+   */
+
+  const blocks =
+    [
+      ...card.querySelectorAll(
+        ".print-block"
+      )
+    ];
+
+
+  /*
+   * 记录 footer
+   */
+
+  const footer =
+    card.querySelector(
+      ".footer"
+    );
+
+
+  /*
+   * 临时移除 footer
+   * 最后只放在最后一页
+   */
+
+  if (footer) {
+
+    footer.remove();
+
+  }
+
+
+  /*
+   * 清除原来的 blocks
+   */
+
+  blocks.forEach(
+    block =>
+      block.remove()
+  );
+
+
+  /*
+   * 页面顶部固定内容：
+   *
+   * header
+   * category
+   * title
+   * intro
+   * cover
+   * info
+   *
+   * 这些先保留。
+   */
+
+  const fixedBlocks = [];
+
+
+  const heading =
+    card.querySelector(
+      ".page-heading"
+    );
+
+
+  const category =
+    card.querySelector(
+      ".category"
+    );
+
+
+  const title =
+    card.querySelector(
+      "h1"
+    );
+
+
+  const intro =
+    card.querySelector(
+      ".intro"
+    );
+
+
+  const cover =
+    card.querySelector(
+      ".cover-wrap"
+    );
+
+
+  const info =
+    card.querySelector(
+      ".info-grid"
+    );
+
+
+  if (heading)
+    fixedBlocks.push(
+      heading
+    );
+
+
+  if (category)
+    fixedBlocks.push(
+      category
+    );
+
+
+  if (title)
+    fixedBlocks.push(
+      title
+    );
+
+
+  if (intro)
+    fixedBlocks.push(
+      intro
+    );
+
+
+  if (cover)
+    fixedBlocks.push(
+      cover
+    );
+
+
+  if (info)
+    fixedBlocks.push(
+      info
+    );
+
+
+  /*
+   * 真正需要分页的 blocks
+   */
+
+  const flowBlocks =
+    blocks.filter(
+      block =>
+        !fixedBlocks.includes(
+          block
+        )
+    );
+
+
+  /*
+   * 原页面清空
+   */
+
+  card.innerHTML = "";
+
+
+  /*
+   * 创建第一张页面
+   */
+
+  let currentPage =
+    firstPage;
+
+
+  let currentCard =
+    createPageCard(
+      currentPage
+    );
+
+
+  /*
+   * 加入固定内容
+   */
+
+  fixedBlocks.forEach(
+    block =>
+      currentCard.appendChild(
+        block
+      )
+  );
+
+
+  /*
+   * 分页可用高度
+   *
+   * 不使用 297mm。
+   *
+   * 给 Safari 留安全空间。
+   */
+
+  const availableHeight =
+    currentCard.clientHeight;
+
+
+  /*
+   * 添加 flow blocks
+   */
+
+  flowBlocks.forEach(
+    block => {
+
+      currentCard.appendChild(
+        block
+      );
+
+
+      /*
+       * 如果超过当前页面
+       */
+
+      if (
+        currentCard.scrollHeight >
+        availableHeight
+      ) {
+
+        /*
+         * 移除刚刚放进去的 block
+         */
+
+        currentCard.removeChild(
+          block
+        );
+
+
+        /*
+         * 新页面
+         */
+
+        currentPage =
+          createNewPage(
+            root,
+            backgroundURL
+          );
+
+
+        currentCard =
+          currentPage.querySelector(
+            ".content-card"
+          );
+
+
+        /*
+         * 再放进去
+         */
+
+        currentCard.appendChild(
+          block
+        );
+
+      }
+
+    }
+  );
+
+
+  /*
+   * 最后一页 footer
+   */
+
+  if (footer) {
+
+    currentCard.appendChild(
+      footer
+    );
+
+  }
+
+
+  /*
+   * 第一页已经有自己的背景
+   * 新页面也会有背景
+   */
+
+}
+
+
+/* =====================================================
+   CREATE PAGE CARD
+===================================================== */
+
+function createPageCard(
+  page
+) {
+
+  let card =
+    page.querySelector(
+      ".content-card"
+    );
+
+
+  if (!card) {
+
+    card =
+      document.createElement(
+        "div"
+      );
+
+    card.className =
+      "content-card";
+
+    page.appendChild(
+      card
+    );
+
+  }
+
+
+  return card;
+
+}
+
+
+/* =====================================================
+   CREATE NEW PAGE
+===================================================== */
+
+function createNewPage(
+  root,
+  backgroundURL
+) {
+
+  const page =
+    document.createElement(
+      "section"
+    );
+
+
+  page.className =
+    "print-page";
+
+
+  page.innerHTML = `
+
+    <img
+      class="page-background"
+      src="${backgroundURL}"
+      alt=""
+    >
+
+    <div
+      class="content-card"
+    ></div>
+
+  `;
+
+
+  root.appendChild(
+    page
+  );
+
+
+  return page;
+
+}
+
+
+/* =====================================================
+   START
+===================================================== */
+
+preparePrint();
 
 </script>
 
@@ -3544,9 +4212,12 @@ Promise.all([
 </body>
 
 </html>
+
   `);
 
+
   printWindow.document.close();
+
 }
 
   
