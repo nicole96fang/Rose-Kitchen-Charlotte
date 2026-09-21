@@ -586,30 +586,49 @@ function bindHome() {
   );
 
   const input =
-    $("#global-search");
+  $("#global-search");
 
-  if (input) {
-    input.oninput = event => {
+if (input) {
+  let isComposing = false;
+
+  input.addEventListener(
+    "compositionstart",
+    () => {
+      isComposing = true;
+    }
+  );
+
+  input.addEventListener(
+    "compositionend",
+    event => {
+      isComposing = false;
+
       searchText =
         event.target.value;
 
       renderHome(
         store.getState()
       );
+    }
+  );
 
-      const next =
-        $("#global-search");
+  input.addEventListener(
+    "input",
+    event => {
 
-      if (next) {
-        next.focus();
-
-        next.setSelectionRange(
-          next.value.length,
-          next.value.length
-        );
+      if (isComposing) {
+        return;
       }
-    };
-  }
+
+      searchText =
+        event.target.value;
+
+      renderHome(
+        store.getState()
+      );
+    }
+  );
+}
 
   const clear =
     $("#clear-search");
