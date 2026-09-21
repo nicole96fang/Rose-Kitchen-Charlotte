@@ -2553,21 +2553,18 @@ body {
   position: relative;
 
   width: 210mm;
-  height: 296mm;
-  min-height: 296mm;
-  max-height: 296mm;
+  height: 280mm;
 
-  margin: 0;
+  margin: 0 0 17mm 0;
   padding: 7mm;
 
-  overflow: hidden;
+  overflow: visible;
 
   break-after: auto;
   page-break-after: auto;
 }
 
-/* 只有照片页需要主动进入下一张 A4 */
-.photo-page {
+.print-page + .print-page {
   break-before: page;
   page-break-before: always;
 }
@@ -2582,6 +2579,16 @@ body {
 
   width: 210mm;
   height: 297mm;
+
+  max-width: none;
+  max-height: none;
+
+  object-fit: cover;
+
+  z-index: 0;
+
+  opacity: 0.72;
+}
 
   object-fit: cover;
 
@@ -2863,12 +2870,15 @@ body {
 
   .print-page {
     width: 210mm;
-    height: 296mm;
-    min-height: 296mm;
-    max-height: 296mm;
+    height: 280mm;
 
-    margin: 0;
+    min-height: 280mm;
+    max-height: 280mm;
+
+    margin: 0 0 17mm 0;
     padding: 7mm;
+
+    overflow: visible;
   }
 }
 
