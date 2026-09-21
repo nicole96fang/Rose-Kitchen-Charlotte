@@ -2756,43 +2756,32 @@ body {
 
 
 /* =========================================
-   A4 PAGE
+   A4 PRINT PAGE — iPhone Safari safe
    ========================================= */
 
 .print-page {
+  position: relative;
 
-  position:
-    relative;
+  width: 210mm;
 
-  width:
-    210mm;
+  /* 不再固定 297mm 高度 */
+  min-height: 286mm;
 
-  height:
-    297mm;
+  margin: 0;
 
-  min-height:
-    297mm;
+  padding: 7mm;
 
-  max-height:
-    297mm;
+  box-sizing: border-box;
 
-  margin:
-    0;
+  overflow: visible;
 
-  padding:
-    7mm;
-
-  overflow:
-    hidden;
-
-  page-break-after:
-    always;
-
-  break-after:
-    page;
+  /* 只使用旧式 Safari 比较稳定的分页方式 */
+  page-break-after: always;
 }
 
-.print-page:last-child {
+.print-page:last-of-type {
+  page-break-after: auto;
+}
 
   page-break-after:
     auto;
@@ -2807,36 +2796,25 @@ body {
    ========================================= */
 
 .page-background {
+  position: absolute;
 
-  position:
-    absolute;
+  left: 0;
+  top: 0;
 
-  left:
-    0;
+  width: 210mm;
+  height: 286mm;
 
-  top:
-    0;
+  max-width: none;
+  max-height: none;
 
-  width:
-    210mm;
+  object-fit: cover;
+  object-position: top center;
 
-  height:
-    297mm;
+  z-index: 0;
 
-  max-width:
-    none;
+  opacity: 0.72;
 
-  max-height:
-    none;
-
-  object-fit:
-    cover;
-
-  z-index:
-    0;
-
-  opacity:
-    0.72;
+  pointer-events: none;
 }
 
 
@@ -2849,30 +2827,39 @@ body {
    ========================================= */
 
 .content-card {
+  position: relative;
 
-  position:
-    relative;
+  z-index: 2;
 
-  z-index:
-    2;
+  width: 100%;
 
-  width:
-    100%;
+  min-height: 272mm;
 
-  height:
-    282mm;
+  height: auto;
+  max-height: none;
 
-  min-height:
-    282mm;
+  padding: 7mm;
 
-  max-height:
-    282mm;
+  overflow: visible;
 
-  padding:
-    7mm;
+  box-sizing: border-box;
 
-  overflow:
-    hidden;
+  border-radius: 8mm;
+
+  background: rgba(
+    255,
+    255,
+    255,
+    0.72
+  );
+
+  border: 1px solid rgba(
+    255,
+    255,
+    255,
+    0.85
+  );
+}
 
   border-radius:
     8mm;
@@ -3230,6 +3217,10 @@ body {
 /* =========================================
    PHOTO PAGE
    ========================================= */
+.photo-page {
+  page-break-before: always;
+  page-break-after: auto;
+}
 
 .photo-page .content-card {
 
@@ -3368,41 +3359,62 @@ body {
 
 @media print {
 
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
   html,
   body {
+    width: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
 
-    width:
-      210mm;
+    background: transparent !important;
 
-    margin:
-      0;
-
-    padding:
-      0;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   .print-page {
+    width: 210mm;
 
-    width:
-      210mm;
+    min-height: 286mm;
 
-    height:
-      297mm;
+    height: auto;
 
-    min-height:
-      297mm;
+    margin: 0 !important;
+    padding: 7mm;
 
-    max-height:
-      297mm;
+    box-sizing: border-box;
 
-    margin:
-      0;
+    overflow: visible;
 
-    padding:
-      7mm;
+    page-break-after: always;
+  }
 
-    overflow:
-      hidden;
+  .print-page:last-of-type {
+    page-break-after: auto;
+  }
+
+  .content-card {
+    height: auto;
+    min-height: 272mm;
+    max-height: none;
+
+    overflow: visible;
+  }
+
+  .cover-wrap,
+  .ingredient-row,
+  .step-item,
+  .photo-box {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .photo-page {
+    page-break-before: always;
   }
 }
 
