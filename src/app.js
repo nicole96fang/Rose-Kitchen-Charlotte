@@ -2395,18 +2395,15 @@ function bottomNav(active = "") {
 
 
 // ==================================================
-// PRINT
-// ==================================================
-
-// ==================================================
-// PRINT
+// PRINT — FINAL iPHONE SAFARI VERSION
 // ==================================================
 
 function printRecipe(recipe) {
 
-  const photos = Array.isArray(recipe.photos)
-    ? recipe.photos
-    : [];
+  const photos =
+    Array.isArray(recipe.photos)
+      ? recipe.photos
+      : [];
 
   const coverPhoto =
     recipe.cover ||
@@ -2415,24 +2412,21 @@ function printRecipe(recipe) {
 
   const galleryPhotos =
     photos.filter(
-      photo => photo !== coverPhoto
+      photo =>
+        photo !== coverPhoto
     );
 
   const baseURL =
     window.location.href;
 
-  /*
-   * 保持原来的背景
-   */
+  // 保持原来的背景
   const backgroundURL =
     new URL(
       "./assets/app-background.jpg",
       baseURL
     ).href;
 
-  /*
-   * 保持原来的字体
-   */
+  // 保持原来的字体
   const fontURL =
     new URL(
       "./assets/fonts/泥木扭扭体NeedMood NiuNiu.ttf",
@@ -2456,7 +2450,7 @@ function printRecipe(recipe) {
 
 
   // ==================================================
-  // SAFE HTML
+  // SAFE
   // ==================================================
 
   function safe(value) {
@@ -2484,6 +2478,7 @@ function printRecipe(recipe) {
         /'/g,
         "&#039;"
       );
+
   }
 
 
@@ -2505,6 +2500,7 @@ function printRecipe(recipe) {
       ? ingredients
           .map(
             item => `
+
               <div class="ingredient-row">
 
                 <span class="ingredient-name">
@@ -2520,14 +2516,17 @@ function printRecipe(recipe) {
                 </span>
 
               </div>
+
             `
           )
           .join("")
 
       : `
+
           <div class="empty-text">
             暂无食材记录
           </div>
+
         `;
 
 
@@ -2577,6 +2576,7 @@ function printRecipe(recipe) {
               step,
               index
             ) => `
+
               <div class="step-item">
 
                 <div class="step-number">
@@ -2588,14 +2588,17 @@ function printRecipe(recipe) {
                 </div>
 
               </div>
+
             `
           )
           .join("")
 
       : `
+
           <div class="empty-text">
             暂无步骤记录
           </div>
+
         `;
 
 
@@ -2625,11 +2628,13 @@ function printRecipe(recipe) {
       ${
         recipe.servings
           ? `
+
             <span>
               🍽 ${safe(
                 recipe.servings
               )}
             </span>
+
           `
           : ""
       }
@@ -2637,11 +2642,13 @@ function printRecipe(recipe) {
       ${
         recipe.time
           ? `
+
             <span>
               ⏱ ${safe(
                 recipe.time
               )}
             </span>
+
           `
           : ""
       }
@@ -2649,11 +2656,13 @@ function printRecipe(recipe) {
       ${
         categoryName
           ? `
+
             <span>
               ♡ ${safe(
                 categoryName
               )}
             </span>
+
           `
           : ""
       }
@@ -2689,14 +2698,28 @@ function printRecipe(recipe) {
 
 
   // ==================================================
-  // PHOTO HTML
-  // 每一页最多4张
+  // PHOTO PAGES
+  //
+  // 一页最多4张
   // ==================================================
 
-  function photoPageHTML(
-    pagePhotos,
-    pageNumber
+  const PHOTO_PER_PAGE = 4;
+
+  let photoPagesHTML = "";
+
+
+  for (
+    let i = 0;
+    i < galleryPhotos.length;
+    i += PHOTO_PER_PAGE
   ) {
+
+    const pagePhotos =
+      galleryPhotos.slice(
+        i,
+        i + PHOTO_PER_PAGE
+      );
+
 
     const photoItems =
       pagePhotos
@@ -2719,18 +2742,17 @@ function printRecipe(recipe) {
         .join("");
 
 
-    return `
+    photoPagesHTML += `
 
-      <section class="print-sheet photo-sheet">
+      <div class="print-page photo-page">
 
-        <div class="sheet-card">
+        <div class="page-bg"></div>
 
-          <div class="photo-title">
+        <div class="page-card">
 
+          <h2 class="photo-title">
             📷 制作照片
-
-          </div>
-
+          </h2>
 
           <div class="photo-grid">
 
@@ -2738,63 +2760,24 @@ function printRecipe(recipe) {
 
           </div>
 
-
-          <div class="print-footer">
-
+          <div class="footer">
             芳芳的小厨房日记 · My Kitchen Rose
-
           </div>
 
         </div>
 
-      </section>
+      </div>
 
     `;
-  }
-
-
-  // ==================================================
-  // PHOTO PAGES
-  // ==================================================
-
-  let photoPagesHTML = "";
-
-
-  if (
-    galleryPhotos.length
-  ) {
-
-    const PHOTO_PER_PAGE = 4;
-
-    for (
-      let i = 0;
-      i < galleryPhotos.length;
-      i += PHOTO_PER_PAGE
-    ) {
-
-      const pagePhotos =
-        galleryPhotos.slice(
-          i,
-          i + PHOTO_PER_PAGE
-        );
-
-      photoPagesHTML +=
-        photoPageHTML(
-          pagePhotos,
-          Math.floor(
-            i /
-              PHOTO_PER_PAGE
-          ) + 1
-        );
-
-    }
 
   }
 
 
   // ==================================================
-  // PRINT DOCUMENT
+  // DOCUMENT
   // ==================================================
+
+  printWindow.document.open();
 
   printWindow.document.write(`
 
@@ -2835,11 +2818,12 @@ function printRecipe(recipe) {
 
   font-display:
     block;
+
 }
 
 
 /* ==================================================
-   A4
+   PAGE
    ================================================== */
 
 @page {
@@ -2849,24 +2833,13 @@ function printRecipe(recipe) {
 
   margin:
     0;
+
 }
 
 
 /* ==================================================
-   GLOBAL
+   RESET
    ================================================== */
-
-* {
-
-  box-sizing:
-    border-box;
-
-  font-family:
-    "NeedMoodNiuNiu",
-    sans-serif !important;
-
-}
-
 
 html,
 body {
@@ -2880,8 +2853,17 @@ body {
   width:
     100%;
 
-  background:
-    #ffffff;
+}
+
+
+* {
+
+  box-sizing:
+    border-box;
+
+  font-family:
+    "NeedMoodNiuNiu",
+    sans-serif !important;
 
 }
 
@@ -2890,6 +2872,9 @@ body {
 
   color:
     #455b61;
+
+  background:
+    #ffffff;
 
   -webkit-print-color-adjust:
     exact !important;
@@ -2901,19 +2886,18 @@ body {
 
 
 /* ==================================================
-   PRINT SHEET
+   PRINT PAGE
 
-   294mm instead of 297mm
-   给 iPhone Safari 留一点安全空间
+   关键：
 
-   不使用：
-   break-after
-   break-before
-   page-break-after
-   page-break-inside
+   不设置 height
+   不设置 min-height
+   不设置 max-height
+
+   只让浏览器按照 A4 自己分页
    ================================================== */
 
-.print-sheet {
+.print-page {
 
   position:
     relative;
@@ -2921,59 +2905,107 @@ body {
   width:
     210mm;
 
-  height:
-    294mm;
-
   margin:
     0;
 
   padding:
-    7mm;
+    8mm;
 
   box-sizing:
     border-box;
 
-  overflow:
-    hidden;
+}
 
-  background-image:
-    url("${backgroundURL}");
 
-  background-size:
-    100% 100%;
+/*
+ * 只有后面的页面才强制开始新页
+ */
 
-  background-position:
-    center;
+.photo-page {
 
-  background-repeat:
-    no-repeat;
+  break-before:
+    page;
+
+  page-break-before:
+    always;
+
+}
+
+
+/*
+ * 最后一个页面绝对不要再强制下一页
+ */
+
+.photo-page:last-child {
+
+  break-after:
+    auto;
+
+  page-break-after:
+    auto;
 
 }
 
 
 /* ==================================================
-   CONTENT CARD
+   BACKGROUND
    ================================================== */
 
-.sheet-card {
+.page-bg {
+
+  position:
+    absolute;
+
+  left:
+    0;
+
+  top:
+    0;
+
+  width:
+    210mm;
+
+  height:
+    297mm;
+
+  background-image:
+    url("${backgroundURL}");
+
+  background-size:
+    cover;
+
+  background-position:
+    center top;
+
+  background-repeat:
+    no-repeat;
+
+  z-index:
+    0;
+
+}
+
+
+/* ==================================================
+   CARD
+   ================================================== */
+
+.page-card {
 
   position:
     relative;
 
+  z-index:
+    2;
+
   width:
     100%;
-
-  height:
-    280mm;
 
   padding:
     7mm;
 
   box-sizing:
     border-box;
-
-  overflow:
-    hidden;
 
   border-radius:
     8mm;
@@ -2999,16 +3031,53 @@ body {
 
 
 /* ==================================================
-   RECIPE CONTENT
+   COVER
    ================================================== */
 
-.recipe-content {
+.cover-wrap {
 
   width:
     100%;
 
-  transform-origin:
-    top center;
+  margin:
+    0 auto 5mm;
+
+  border-radius:
+    6mm;
+
+  overflow:
+    hidden;
+
+  background:
+    rgba(
+      235,
+      244,
+      245,
+      0.65
+    );
+
+}
+
+
+.cover-wrap img {
+
+  display:
+    block;
+
+  width:
+    100%;
+
+  height:
+    auto;
+
+  max-height:
+    55mm;
+
+  object-fit:
+    contain;
+
+  margin:
+    0 auto;
 
 }
 
@@ -3061,58 +3130,6 @@ body {
 
   line-height:
     1.7;
-
-}
-
-
-/* ==================================================
-   COVER
-   ================================================== */
-
-.cover-wrap {
-
-  width:
-    100%;
-
-  margin:
-    0 auto 5mm;
-
-  border-radius:
-    6mm;
-
-  overflow:
-    hidden;
-
-  background:
-    rgba(
-      235,
-      244,
-      245,
-      0.65
-    );
-
-}
-
-
-.cover-wrap img {
-
-  display:
-    block;
-
-  width:
-    100%;
-
-  height:
-    auto;
-
-  max-height:
-    55mm;
-
-  object-fit:
-    contain;
-
-  margin:
-    auto;
 
 }
 
@@ -3350,7 +3367,7 @@ body {
 
 
 /* ==================================================
-   PHOTO PAGE
+   PHOTO
    ================================================== */
 
 .photo-title {
@@ -3359,7 +3376,7 @@ body {
     center;
 
   margin:
-    0 0 6mm;
+    0 0 7mm;
 
   color:
     #536c72;
@@ -3396,7 +3413,7 @@ body {
     100%;
 
   height:
-    84mm;
+    82mm;
 
   border-radius:
     5mm;
@@ -3445,19 +3462,10 @@ body {
    FOOTER
    ================================================== */
 
-.print-footer {
+.footer {
 
-  position:
-    absolute;
-
-  left:
+  margin-top:
     7mm;
-
-  right:
-    7mm;
-
-  bottom:
-    5mm;
 
   padding-top:
     3mm;
@@ -3484,28 +3492,7 @@ body {
 
 
 /* ==================================================
-   RECIPE CONTINUATION
-   ================================================== */
-
-.continuation-title {
-
-  text-align:
-    center;
-
-  margin:
-    0 0 6mm;
-
-  color:
-    #536c72;
-
-  font-size:
-    18px;
-
-}
-
-
-/* ==================================================
-   PRINT ONLY
+   PRINT
    ================================================== */
 
 @media print {
@@ -3522,27 +3509,15 @@ body {
     width:
       100% !important;
 
-    background:
-      #ffffff !important;
-
   }
 
-  .print-sheet {
+  .print-page {
 
     width:
-      210mm !important;
-
-    height:
-      294mm !important;
+      210mm;
 
     margin:
       0 !important;
-
-    padding:
-      7mm !important;
-
-    overflow:
-      hidden !important;
 
   }
 
@@ -3557,130 +3532,117 @@ body {
 
 
 <!-- ==================================================
-     PAGE 1 — RECIPE
+     RECIPE PAGE
      ================================================== -->
 
-<section
-  class="print-sheet recipe-sheet"
-  id="recipe-sheet"
->
+<div class="print-page">
 
-  <div
-    class="sheet-card"
-    id="recipe-card"
-  >
+  <div class="page-bg"></div>
 
-    <div
-      class="recipe-content"
-      id="recipe-content"
-    >
-
-      ${coverHTML}
+  <div class="page-card">
 
 
-      <header class="recipe-header">
-
-        <h1 class="recipe-title">
-
-          ${safe(
-            recipe.title ||
-            "我的食谱"
-          )}
-
-        </h1>
+    ${coverHTML}
 
 
-        ${
-          recipe.intro
-            ? `
+    <header class="recipe-header">
 
-              <div class="recipe-intro">
+      <h1 class="recipe-title">
 
-                ${safe(
-                  recipe.intro
-                )}
+        ${safe(
+          recipe.title ||
+          "我的食谱"
+        )}
 
-              </div>
-
-            `
-            : ""
-        }
-
-      </header>
+      </h1>
 
 
-      ${infoHTML}
+      ${
+        recipe.intro
+          ? `
+
+            <div class="recipe-intro">
+
+              ${safe(
+                recipe.intro
+              )}
+
+            </div>
+
+          `
+          : ""
+      }
+
+    </header>
 
 
-      <section
-        class="print-section"
-        id="ingredient-section"
-      >
-
-        <h2>
-          🥣 食材
-        </h2>
-
-        <div>
-
-          ${ingredientHTML}
-
-        </div>
-
-      </section>
+    ${infoHTML}
 
 
-      <section
-        class="print-section"
-        id="step-section"
-      >
+    <section class="print-section">
 
-        <h2>
-          👩🏻‍🍳 做法
-        </h2>
+      <h2>
+        🥣 食材
+      </h2>
 
-        <div
-          class="step-list"
-        >
+      <div>
 
-          ${stepHTML}
+        ${ingredientHTML}
 
-        </div>
+      </div>
 
-      </section>
-
-    </div>
+    </section>
 
 
-    <div class="print-footer">
+    <section class="print-section">
+
+      <h2>
+        👩🏻‍🍳 做法
+      </h2>
+
+      <div class="step-list">
+
+        ${stepHTML}
+
+      </div>
+
+    </section>
+
+
+    <div class="footer">
 
       芳芳的小厨房日记 · My Kitchen Rose
 
     </div>
 
+
   </div>
 
-</section>
+</div>
 
+
+<!-- ==================================================
+     PHOTO PAGE(S)
+     ================================================== -->
 
 ${photoPagesHTML}
 
 
 <script>
 
+/* ==================================================
+   WAIT FOR IMAGES
+   ================================================== */
 
-// ==================================================
-// WAIT FOR IMAGES
-// ==================================================
-
-function waitForImages() {
+async function waitForImages() {
 
   const images =
     Array.from(
       document.images
     );
 
-  return Promise.all(
+
+  await Promise.all(
 
     images.map(
       img => {
@@ -3692,6 +3654,7 @@ function waitForImages() {
           return Promise.resolve();
 
         }
+
 
         return new Promise(
           resolve => {
@@ -3713,83 +3676,9 @@ function waitForImages() {
 }
 
 
-// ==================================================
-// FIT CONTENT
-//
-// 正常食谱：100%大小
-//
-// 如果真的太高：
-// 自动缩小，不制造空白页
-// ==================================================
-
-function fitRecipeContent() {
-
-  const card =
-    document.getElementById(
-      "recipe-card"
-    );
-
-  const content =
-    document.getElementById(
-      "recipe-content"
-    );
-
-  if (
-    !card ||
-    !content
-  ) {
-
-    return;
-
-  }
-
-
-  content.style.transform =
-    "scale(1)";
-
-
-  const availableHeight =
-    card.clientHeight -
-    30;
-
-
-  const actualHeight =
-    content.scrollHeight;
-
-
-  if (
-    actualHeight >
-    availableHeight
-  ) {
-
-    const scale =
-      availableHeight /
-      actualHeight;
-
-
-    const safeScale =
-      Math.max(
-        0.72,
-        Math.min(
-          1,
-          scale
-        )
-      );
-
-
-    content.style.transform =
-      "scale(" +
-      safeScale +
-      ")";
-
-  }
-
-}
-
-
-// ==================================================
-// PREPARE PRINT
-// ==================================================
+/* ==================================================
+   PRINT
+   ================================================== */
 
 async function preparePrint() {
 
@@ -3813,31 +3702,15 @@ async function preparePrint() {
 
 
   /*
-   * 再等一下 Safari 完成排版
+   * 给 iPhone Safari 时间
+   * 完成字体、图片和背景渲染
    */
 
   await new Promise(
     resolve =>
       setTimeout(
         resolve,
-        350
-      )
-  );
-
-
-  fitRecipeContent();
-
-
-  /*
-   * 再给 Safari 一点时间
-   * 重新计算页面高度
-   */
-
-  await new Promise(
-    resolve =>
-      setTimeout(
-        resolve,
-        250
+        500
       )
   );
 
@@ -3846,10 +3719,6 @@ async function preparePrint() {
 
 }
 
-
-// ==================================================
-// START
-// ==================================================
 
 preparePrint();
 
