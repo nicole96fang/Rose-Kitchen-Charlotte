@@ -2562,13 +2562,14 @@ body {
 
   overflow: hidden;
 
-  break-after: page;
-  page-break-after: always;
-}
-
-.print-page:last-child {
   break-after: auto;
   page-break-after: auto;
+}
+
+/* 只有照片页需要主动进入下一张 A4 */
+.photo-page {
+  break-before: page;
+  page-break-before: always;
 }
 
 /* 每一页都有完整背景 */
