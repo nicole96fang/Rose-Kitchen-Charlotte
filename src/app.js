@@ -2404,6 +2404,7 @@ function printRecipe(recipe) {
   const galleryPhotos = photos.filter((photo) => photo !== coverPhoto);
 
   const baseURL = window.location.href;
+
   const backgroundURL = new URL(
     "./assets/app-background.jpg",
     baseURL
@@ -2421,6 +2422,13 @@ function printRecipe(recipe) {
     return;
   }
 
+  const safe = (value) =>
+    String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+
   const ingredients = Array.isArray(recipe.ingredients)
     ? recipe.ingredients
     : [];
@@ -2428,13 +2436,6 @@ function printRecipe(recipe) {
   const steps = Array.isArray(recipe.steps)
     ? recipe.steps
     : [];
-
-  const safe = (value) =>
-    String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
 
   const ingredientHTML = ingredients.length
     ? ingredients
@@ -2455,33 +2456,54 @@ function printRecipe(recipe) {
           (step, index) => `
             <div class="step-item">
               <div class="step-number">${index + 1}</div>
-              <div class="step-content">
-                ${safe(step)}
-              </div>
+              <div class="step-content">${safe(step)}</div>
             </div>
           `
         )
         .join("")
     : `<div class="empty-text">暂无步骤记录</div>`;
 
-  const photoHTML = galleryPhotos.length
+  const coverHTML = coverPhoto
     ? `
-      <section class="print-section photo-section">
-        <h2>📷 制作照片</h2>
-        <div class="photo-grid">
-          ${galleryPhotos
-            .map(
-              (photo) => `
-                <div class="photo-box">
-                  <img src="${photo}" alt="">
-                </div>
-              `
-            )
-            .join("")}
-        </div>
-      </section>
+      <div class="cover-wrap">
+        <img src="${coverPhoto}" alt="">
+      </div>
     `
     : "";
+
+  const photoHTML = galleryPhotos.length
+    ? galleryPhotos
+        .map(
+          (photo) => `
+            <div class="photo-box">
+              <img src="${photo}" alt="">
+            </div>
+          `
+        )
+        .join("")
+    : "";
+
+  const infoHTML = `
+    <div class="recipe-info">
+      ${
+        recipe.servings
+          ? `<span>🍽 ${safe(recipe.servings)}</span>`
+          : ""
+      }
+
+      ${
+        recipe.time
+          ? `<span>⏱ ${safe(recipe.time)}</span>`
+          : ""
+      }
+
+      ${
+        recipe.category
+          ? `<span>♡ ${safe(recipe.category)}</span>`
+          : ""
+      }
+    </div>
+  `;
 
   printWindow.document.write(`
 <!DOCTYPE html>
@@ -2505,11 +2527,9 @@ function printRecipe(recipe) {
   margin: 0;
 }
 
-html,
-body,
 * {
-  font-family: "NeedMoodNiuNiu", sans-serif !important;
   box-sizing: border-box;
+  font-family: "NeedMoodNiuNiu", sans-serif !important;
 }
 
 html,
@@ -2525,13 +2545,23 @@ body {
   print-color-adjust: exact !important;
 }
 
+/* =========================
+   每一张真正独立的 A4
+   ========================= */
+
 .print-page {
   position: relative;
+
   width: 210mm;
+  height: 297mm;
   min-height: 297mm;
-  padding: 7mm;
+  max-height: 297mm;
+
   margin: 0;
+  padding: 7mm;
+
   overflow: hidden;
+
   break-after: page;
   page-break-after: always;
 }
@@ -2541,96 +2571,152 @@ body {
   page-break-after: auto;
 }
 
+/* 每一页都有完整背景 */
+
 .page-background {
   position: absolute;
-  inset: 0;
+
+  left: 0;
+  top: 0;
+
   width: 210mm;
   height: 297mm;
+
   object-fit: cover;
+
   z-index: 0;
+
   opacity: 0.72;
 }
+
+/* 内容卡片 */
 
 .content-card {
   position: relative;
   z-index: 2;
+
   width: 100%;
+  height: 283mm;
   min-height: 283mm;
+  max-height: 283mm;
+
   padding: 7mm;
+
+  overflow: hidden;
+
   border-radius: 8mm;
-  background: rgba(255, 255, 255, 0.76);
+
+  background: rgba(255, 255, 255, 0.72);
+
   border: 1px solid rgba(255,255,255,0.85);
 }
 
+/* =========================
+   第一页
+   ========================= */
+
 .recipe-header {
   text-align: center;
-  margin-bottom: 7mm;
+  margin-bottom: 6mm;
 }
 
 .recipe-title {
   margin: 0;
+
   color: #405960;
+
   font-size: 25px;
   line-height: 1.25;
+
   font-weight: 700;
 }
 
 .recipe-intro {
   margin-top: 3mm;
+
   color: #70858a;
+
   font-size: 13px;
   line-height: 1.7;
 }
 
 .cover-wrap {
   width: 100%;
-  margin: 0 auto 7mm;
+
+  margin: 0 auto 6mm;
+
   border-radius: 6mm;
+
   overflow: hidden;
-  background: rgba(235,244,245,0.7);
+
+  background: rgba(235,244,245,0.65);
+
   break-inside: avoid;
   page-break-inside: avoid;
 }
 
 .cover-wrap img {
   display: block;
+
   width: 100%;
-  max-height: 72mm;
+
+  max-height: 65mm;
+
   object-fit: contain;
+
   margin: auto;
 }
 
 .recipe-info {
   display: flex;
+
   justify-content: center;
-  gap: 8mm;
+
+  align-items: center;
+
+  gap: 7mm;
+
   flex-wrap: wrap;
-  margin-bottom: 7mm;
+
+  margin-bottom: 6mm;
+
   color: #63797e;
+
   font-size: 12px;
 }
 
 .print-section {
-  margin-bottom: 7mm;
+  margin-bottom: 6mm;
+
   break-inside: avoid;
   page-break-inside: avoid;
 }
 
 .print-section h2 {
-  margin: 0 0 4mm;
+  margin: 0 0 3mm;
+
   padding-bottom: 2mm;
+
   border-bottom: 1px solid rgba(103,133,140,0.25);
+
   color: #536c72;
+
   font-size: 16px;
 }
 
 .ingredient-row {
   display: flex;
+
   justify-content: space-between;
+
   gap: 8mm;
-  padding: 2.2mm 1mm;
+
+  padding: 2mm 1mm;
+
   border-bottom: 1px dashed rgba(103,133,140,0.18);
+
   font-size: 12px;
+
   break-inside: avoid;
   page-break-inside: avoid;
 }
@@ -2642,80 +2728,131 @@ body {
 
 .step-list {
   display: flex;
+
   flex-direction: column;
-  gap: 3mm;
+
+  gap: 2.5mm;
 }
 
 .step-item {
   display: flex;
-  gap: 3mm;
+
   align-items: flex-start;
+
+  gap: 3mm;
+
   break-inside: avoid;
   page-break-inside: avoid;
 }
 
 .step-number {
   flex: 0 0 8mm;
+
   width: 8mm;
   height: 8mm;
+
   border-radius: 50%;
+
   background: rgba(126,164,171,0.18);
+
   color: #536c72;
+
   display: flex;
+
   align-items: center;
   justify-content: center;
+
   font-size: 11px;
 }
 
 .step-content {
   flex: 1;
+
   font-size: 12px;
-  line-height: 1.7;
+
+  line-height: 1.65;
+
   color: #53666b;
 }
 
-.photo-section {
-  break-inside: avoid;
-  page-break-inside: avoid;
+/* =========================
+   第二页：照片
+   ========================= */
+
+.photo-page .content-card {
+  padding: 7mm;
+}
+
+.photo-title {
+  text-align: center;
+
+  margin: 0 0 7mm;
+
+  color: #536c72;
+
+  font-size: 18px;
 }
 
 .photo-grid {
   display: grid;
+
   grid-template-columns: repeat(2, 1fr);
-  gap: 4mm;
+
+  gap: 5mm;
 }
 
 .photo-box {
-  min-height: 45mm;
-  max-height: 65mm;
+  width: 100%;
+
+  height: 65mm;
+
   border-radius: 5mm;
+
   overflow: hidden;
-  background: rgba(236,244,244,0.6);
+
+  background: rgba(236,244,244,0.65);
+
   display: flex;
+
   align-items: center;
   justify-content: center;
+
   break-inside: avoid;
   page-break-inside: avoid;
 }
 
 .photo-box img {
   display: block;
+
   width: 100%;
   height: 100%;
-  max-height: 65mm;
+
   object-fit: contain;
 }
 
+/* footer */
+
 .print-footer {
-  margin-top: 7mm;
+  position: absolute;
+
+  left: 7mm;
+  right: 7mm;
+
+  bottom: 6mm;
+
   padding-top: 3mm;
+
   border-top: 1px solid rgba(103,133,140,0.2);
+
   text-align: center;
+
   color: #8a9a9e;
+
   font-size: 10px;
 }
 
 @media print {
+
   html,
   body {
     width: 210mm;
@@ -2725,7 +2862,10 @@ body {
 
   .print-page {
     width: 210mm;
+    height: 297mm;
     min-height: 297mm;
+    max-height: 297mm;
+
     margin: 0;
     padding: 7mm;
   }
@@ -2735,6 +2875,10 @@ body {
 </head>
 
 <body>
+
+<!-- =========================
+     第 1 页
+     ========================= -->
 
 <section class="print-page">
 
@@ -2746,63 +2890,47 @@ body {
 
   <div class="content-card">
 
-    ${
-      coverPhoto
-        ? `
-      <div class="cover-wrap">
-        <img src="${coverPhoto}" alt="">
-      </div>
-      `
-        : ""
-    }
+    ${coverHTML}
 
     <header class="recipe-header">
-      <h1 class="recipe-title">${safe(recipe.title || "我的食谱")}</h1>
+
+      <h1 class="recipe-title">
+        ${safe(recipe.title || "我的食谱")}
+      </h1>
 
       ${
         recipe.intro
-          ? `<div class="recipe-intro">${safe(recipe.intro)}</div>`
+          ? `
+            <div class="recipe-intro">
+              ${safe(recipe.intro)}
+            </div>
+          `
           : ""
       }
+
     </header>
 
-    <div class="recipe-info">
-      ${
-        recipe.servings
-          ? `<span>🍽 ${safe(recipe.servings)}</span>`
-          : ""
-      }
-
-      ${
-        recipe.time
-          ? `<span>⏱ ${safe(recipe.time)}</span>`
-          : ""
-      }
-
-      ${
-        recipe.category
-          ? `<span>♡ ${safe(recipe.category)}</span>`
-          : ""
-      }
-    </div>
+    ${infoHTML}
 
     <section class="print-section">
+
       <h2>🥣 食材</h2>
 
       <div>
         ${ingredientHTML}
       </div>
+
     </section>
 
     <section class="print-section">
+
       <h2>👩🏻‍🍳 做法</h2>
 
       <div class="step-list">
         ${stepHTML}
       </div>
-    </section>
 
-    ${photoHTML}
+    </section>
 
     <div class="print-footer">
       芳芳的小厨房日记 · My Kitchen Rose
@@ -2812,21 +2940,63 @@ body {
 
 </section>
 
+
+${
+  galleryPhotos.length
+    ? `
+<!-- =========================
+     第 2 页：完整照片页
+     ========================= -->
+
+<section class="print-page photo-page">
+
+  <img
+    class="page-background"
+    src="${backgroundURL}"
+    alt=""
+  >
+
+  <div class="content-card">
+
+    <h2 class="photo-title">
+      📷 制作照片
+    </h2>
+
+    <div class="photo-grid">
+      ${photoHTML}
+    </div>
+
+    <div class="print-footer">
+      芳芳的小厨房日记 · My Kitchen Rose
+    </div>
+
+  </div>
+
+</section>
+`
+    : ""
+}
+
 <script>
 
 function waitForImages() {
+
   const images = Array.from(document.images);
 
   return Promise.all(
     images.map((img) => {
+
       if (img.complete) {
         return Promise.resolve();
       }
 
       return new Promise((resolve) => {
+
         img.onload = resolve;
         img.onerror = resolve;
+
       });
+
     })
   );
 }
@@ -2834,15 +3004,19 @@ function waitForImages() {
 async function preparePrint() {
 
   try {
+
     if (document.fonts && document.fonts.ready) {
       await document.fonts.ready;
     }
+
   } catch (e) {}
 
   await waitForImages();
 
   setTimeout(() => {
+
     window.print();
+
   }, 500);
 }
 
