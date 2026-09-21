@@ -828,12 +828,48 @@ function recipeCardHTML(recipe) {
       >
         ${recipe.favorite ? "♥" : "♡"}
       </button>
+            <button
+        class="delete-recipe-card-button"
+        data-delete-recipe="${recipe.id}"
+        aria-label="删除食谱"
+      >
+        ×
+      </button>
 
     </article>
   `;
 }
 
 function bindRecipeCards() {
+    $$("[data-delete-recipe]").forEach(
+    button => {
+      button.onclick = async event => {
+        event.stopPropagation();
+
+        const id =
+          button.dataset.deleteRecipe;
+
+        const recipe =
+          recipes().find(
+            item =>
+              item.id === id
+          );
+
+        if (!recipe) return;
+
+        const confirmed =
+          window.confirm(
+            "确定要删除「" +
+            (recipe.title || "未命名食谱") +
+            "」吗？\n\n删除后这个食谱和它保存的照片都会从本机资料中移除。"
+          );
+
+        if (!confirmed) return;
+
+        await store.deleteRecipe(id);
+      };
+    }
+  );
   $$("[data-recipe]").forEach(
     card => {
       card.onclick = event => {
@@ -1063,48 +1099,85 @@ function renderEditor(state) {
         </label>
 
         <div
-          class="photo-preview"
-          id="photo-preview"
-        >
-          ${(recipe.photos || [])
-            .map(
-              photo => `
-                <img
-                  src="${photo}"
-                  alt=""
-                />
+  class="photo-preview"
+  id="photo-preview"
+>
+  ${(recipe.photos || [])
+    .map(
+      (photo, index) => `
+        <div class="photo-preview-item">
+
+          <img
+            src="${photo}"
+            alt=""
+          />
+
+          <button
+            type="button"
+            class="photo-delete-button"
+            data-remove-photo="${index}"
+            aria-label="删除照片"
+          >
+            ×
+          </button>
+
+          ${
+            recipe.cover === photo
+              ? `
+                <span class="photo-cover-badge">
+                  封面
+                </span>
               `
-            )
-            .join("")}
+              : ""
+          }
+
         </div>
+      `
+    )
+    .join("")}
+</div>
 
       </section>
 
 
       <section class="editor-actions">
 
-        <button
-          class="small-action"
-          id="print-recipe"
-        >
-          🖨 Print
-        </button>
+  <button
+    class="small-action"
+    id="print-recipe"
+  >
+    🖨 Print
+  </button>
 
-        <button
-          class="small-action"
-          id="share-recipe"
-        >
-          ↗ 分享
-        </button>
+  <button
+    class="small-action"
+    id="share-recipe"
+  >
+    ↗ 分享
+  </button>
 
-        <button
-          class="save-button"
-          id="save-recipe"
-        >
-          ♥ 保存
-        </button>
+  <button
+    class="save-button"
+    id="save-recipe"
+  >
+    ♥ 保存
+  </button>
 
-      </section>
+  ${
+    recipe.id
+      ? `
+        <button
+          class="small-action danger-action"
+          id="delete-recipe"
+          type="button"
+        >
+          🗑 删除食谱
+        </button>
+      `
+      : ""
+  }
+
+</section>
 
     </div>
 
@@ -1167,6 +1240,66 @@ function renderEditor(state) {
       );
     };
 
+    $$("[data-remove-photo]").forEach(
+    button => {
+      button.onclick = () => {
+
+        const index =
+          Number(
+            button.dataset.removePhoto
+          );
+
+        const removedPhoto =
+          recipe.photos[index];
+
+        recipe.photos.splice(
+          index,
+          1
+        );
+
+        // 如果删除的是封面
+        // 自动换成剩下的第一张
+        if (
+          recipe.cover ===
+          removedPhoto
+        ) {
+          recipe.cover =
+            recipe.photos[0] || "";
+        }
+
+        renderEditor(
+          store.getState()
+        );
+      };
+    }
+  );
+
+  const deleteRecipeButton =
+  $("#delete-recipe");
+
+if (deleteRecipeButton) {
+
+  deleteRecipeButton.onclick =
+    async () => {
+
+      const confirmed =
+        window.confirm(
+          "确定要删除「" +
+          (recipe.title || "未命名食谱") +
+          "」吗？\n\n删除后这个食谱和它保存的照片都会从本机资料中移除。"
+        );
+
+      if (!confirmed) return;
+
+      await store.deleteRecipe(
+        recipe.id
+      );
+
+      showCategory(
+        recipe.categoryId
+      );
+    };
+}
   $("#save-recipe").onclick =
     saveCurrentRecipe;
 
