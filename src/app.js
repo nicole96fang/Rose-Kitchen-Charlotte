@@ -2553,9 +2553,9 @@ body {
   position: relative;
 
   width: 210mm;
-  height: 297mm;
-  min-height: 297mm;
-  max-height: 297mm;
+  height: 296mm;
+  min-height: 296mm;
+  max-height: 296mm;
 
   margin: 0;
   padding: 7mm;
@@ -2862,9 +2862,9 @@ body {
 
   .print-page {
     width: 210mm;
-    height: 297mm;
-    min-height: 297mm;
-    max-height: 297mm;
+    height: 296mm;
+    min-height: 296mm;
+    max-height: 296mm;
 
     margin: 0;
     padding: 7mm;
