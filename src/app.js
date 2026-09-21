@@ -2399,1665 +2399,463 @@ function bottomNav(active = "") {
 // ==================================================
 
 function printRecipe(recipe) {
+  const photos = Array.isArray(recipe.photos) ? recipe.photos : [];
+  const coverPhoto = recipe.cover || photos[0] || "";
+  const galleryPhotos = photos.filter((photo) => photo !== coverPhoto);
 
-  const cat =
-    category(recipe.categoryId);
+  const baseURL = window.location.href;
+  const backgroundURL = new URL(
+    "./assets/app-background.jpg",
+    baseURL
+  ).href;
 
-  const photos =
-    Array.isArray(recipe.photos)
-      ? recipe.photos
-      : [];
+  const fontURL = new URL(
+    "./assets/fonts/泥木扭扭体NeedMood NiuNiu.ttf",
+    baseURL
+  ).href;
 
-  const coverPhoto =
-    recipe.cover ||
-    photos[0] ||
-    "";
-
-  const coverIndex =
-    coverPhoto
-      ? photos.findIndex(
-          photo =>
-            photo === coverPhoto
-        )
-      : -1;
-
-  const galleryPhotos =
-    coverIndex >= 0
-      ? photos.filter(
-          (_, index) =>
-            index !== coverIndex
-        )
-      : photos;
-
-
-  const printWindow =
-    window.open(
-      "",
-      "_blank"
-    );
-
+  const printWindow = window.open("", "_blank");
 
   if (!printWindow) {
-
-    alert(
-      "请允许浏览器打开打印页面"
-    );
-
+    showToast("请允许弹出窗口后再打印");
     return;
   }
 
-
-  /* ==================================================
-     PATHS
-  ================================================== */
-
-  const baseURL =
-    window.location.href;
-
-  const backgroundURL =
-    new URL(
-      "./assets/app-background.jpg",
-      baseURL
-    ).href;
-
-  const fontURL =
-    new URL(
-      "./assets/fonts/泥木扭扭体NeedMood NiuNiu.ttf",
-      baseURL
-    ).href;
-
-
-  /* ==================================================
-     SAFE TEXT
-  ================================================== */
-
-  const safe =
-    value =>
-      escapeHTML(
-        value == null
-          ? ""
-          : String(value)
-      );
-
-
-  /* ==================================================
-     BASIC DATA
-  ================================================== */
-
-  const title =
-    safe(
-      recipe.title ||
-      "我的食谱"
-    );
-
-  const categoryName =
-    safe(
-      cat?.name ||
-      ""
-    );
-
-  const intro =
-    safe(
-      recipe.intro ||
-      ""
-    );
-
-  const servings =
-    safe(
-      recipe.servings ||
-      "—"
-    );
-
-  const time =
-    safe(
-      recipe.time ||
-      "—"
-    );
-
-
-  /* ==================================================
-     WRITE BASIC DOCUMENT
-  ================================================== */
-
-  printWindow.document.open();
-
-  printWindow.document.write(
-    [
-      "<!doctype html>",
-      '<html lang="zh-CN">',
-      "<head>",
-      '<meta charset="UTF-8">',
-      '<meta name="viewport" content="width=device-width, initial-scale=1">',
-      "<title>",
-      title,
-      "</title>",
-
-      "<style>",
-
-      "html, body {",
-      "margin:0;",
-      "padding:0;",
-      "background:#dcecef;",
-      "-webkit-print-color-adjust:exact !important;",
-      "print-color-adjust:exact !important;",
-      "}",
-
-      "@font-face {",
-      'font-family:"NeedMoodNiuNiu";',
-      'src:url("',
-      fontURL,
-      '") format("truetype");',
-      "font-style:normal;",
-      "font-weight:100 900;",
-      "font-display:block;",
-      "}",
-
-      "html, body, * {",
-      'font-family:"NeedMoodNiuNiu", sans-serif !important;',
-      "}",
-
-      "@page {",
-      "size:A4;",
-      "margin:0;",
-      "}",
-
-      "* {",
-      "box-sizing:border-box;",
-      "}",
-
-      /* ----------------------------------------------
-         每一页
-         不再使用接近 297mm 的危险高度
-      ---------------------------------------------- */
-
-      ".print-page {",
-      "position:relative;",
-      "width:210mm;",
-      "height:290mm;",
-      "min-height:290mm;",
-      "max-height:290mm;",
-      "padding:5mm;",
-      "overflow:hidden;",
-      "page-break-after:always;",
-      "break-after:page;",
-      "}",
-
-      ".print-page:last-child {",
-      "page-break-after:auto;",
-      "break-after:auto;",
-      "}",
-
-      /* ----------------------------------------------
-         完整背景
-      ---------------------------------------------- */
-
-      ".page-background {",
-      "position:absolute;",
-      "left:0;",
-      "top:0;",
-      "width:210mm;",
-      "height:290mm;",
-      "object-fit:cover;",
-      "object-position:center top;",
-      "z-index:0;",
-      "opacity:.72;",
-      "}",
-
-      /* ----------------------------------------------
-         内容卡片
-      ---------------------------------------------- */
-
-      ".content-card {",
-      "position:relative;",
-      "z-index:2;",
-      "width:100%;",
-      "height:280mm;",
-      "min-height:280mm;",
-      "max-height:280mm;",
-      "padding:7mm;",
-      "overflow:hidden;",
-      "background:rgba(255,255,255,.88);",
-      "border:1px solid rgba(255,255,255,.94);",
-      "border-radius:28px;",
-      "box-shadow:0 8px 28px rgba(80,110,115,.10);",
-      "}",
-
-      /* ----------------------------------------------
-         header
-      ---------------------------------------------- */
-
-      ".page-heading {",
-      "text-align:center;",
-      "color:#b99b82;",
-      "font-size:11px;",
-      "letter-spacing:4px;",
-      "margin-bottom:4mm;",
-      "}",
-
-      ".page-heading::before {",
-      'content:"♡";',
-      "display:block;",
-      "font-size:19px;",
-      "color:#d9a7aa;",
-      "margin-bottom:1.5mm;",
-      "}",
-
-      ".category {",
-      "text-align:center;",
-      "color:#91a9ad;",
-      "font-size:13px;",
-      "margin-bottom:2mm;",
-      "}",
-
-      "h1 {",
-      "margin:0 0 4mm;",
-      "text-align:center;",
-      "color:#8b7355;",
-      "font-size:28px;",
-      "line-height:1.3;",
-      "font-weight:600;",
-      "}",
-
-      ".intro {",
-      "text-align:center;",
-      "color:#71878b;",
-      "font-size:13px;",
-      "line-height:1.65;",
-      "margin-bottom:4mm;",
-      "}",
-
-      /* ----------------------------------------------
-         cover
-      ---------------------------------------------- */
-
-      ".cover-wrap {",
-      "width:100%;",
-      "text-align:center;",
-      "margin-bottom:4mm;",
-      "break-inside:avoid;",
-      "page-break-inside:avoid;",
-      "}",
-
-      ".cover {",
-      "display:block;",
-      "width:100%;",
-      "height:40mm;",
-      "object-fit:contain;",
-      "object-position:center;",
-      "border-radius:16px;",
-      "}",
-
-      /* ----------------------------------------------
-         info
-      ---------------------------------------------- */
-
-      ".info-grid {",
-      "display:grid;",
-      "grid-template-columns:1fr 1fr;",
-      "gap:5mm;",
-      "margin-top:2mm;",
-      "break-inside:avoid;",
-      "page-break-inside:avoid;",
-      "}",
-
-      ".info-box {",
-      "min-width:0;",
-      "}",
-
-      "h2 {",
-      "margin:0 0 2.5mm;",
-      "padding-bottom:2mm;",
-      "color:#7c979b;",
-      "font-size:17px;",
-      "font-weight:600;",
-      "border-bottom:1px solid rgba(125,157,162,.35);",
-      "}",
-
-      ".info-box ul {",
-      "margin:1mm 0 0 4mm;",
-      "padding-left:4mm;",
-      "}",
-
-      ".info-box li {",
-      "margin:1.3mm 0;",
-      "font-size:13px;",
-      "line-height:1.4;",
-      "}",
-
-      ".info-box p {",
-      "margin:1.5mm 0;",
-      "font-size:13px;",
-      "line-height:1.5;",
-      "}",
-
-      /* ----------------------------------------------
-         steps
-      ---------------------------------------------- */
-
-      ".steps-section {",
-      "margin-top:3mm;",
-      "}",
-
-      ".step-item {",
-      "display:flex;",
-      "gap:2.5mm;",
-      "align-items:flex-start;",
-      "margin:2mm 0;",
-      "break-inside:avoid !important;",
-      "page-break-inside:avoid !important;",
-      "}",
-
-      ".step-index {",
-      "flex:0 0 auto;",
-      "width:6.5mm;",
-      "height:6.5mm;",
-      "display:flex;",
-      "align-items:center;",
-      "justify-content:center;",
-      "border-radius:50%;",
-      "background:rgba(220,236,239,.75);",
-      "color:#7c979b;",
-      "font-size:11px;",
-      "}",
-
-      ".step-text {",
-      "flex:1;",
-      "font-size:13px;",
-      "line-height:1.5;",
-      "}",
-
-      /* ----------------------------------------------
-         photos
-      ---------------------------------------------- */
-
-      ".photo-section {",
-      "margin-top:3mm;",
-      "}",
-
-      ".photo-row {",
-      "display:grid;",
-      "grid-template-columns:1fr 1fr;",
-      "gap:4mm;",
-      "margin-top:3mm;",
-      "break-inside:avoid !important;",
-      "page-break-inside:avoid !important;",
-      "}",
-
-      ".photo-box {",
-      "height:45mm;",
-      "display:flex;",
-      "align-items:center;",
-      "justify-content:center;",
-      "overflow:hidden;",
-      "border-radius:13px;",
-      "background:rgba(236,244,244,.45);",
-      "break-inside:avoid !important;",
-      "page-break-inside:avoid !important;",
-      "}",
-
-      ".photo-box img {",
-      "display:block;",
-      "width:100%;",
-      "height:100%;",
-      "object-fit:contain;",
-      "object-position:center;",
-      "border-radius:13px;",
-      "}",
-
-      ".photo-empty {",
-      "visibility:hidden;",
-      "}",
-
-      /* ----------------------------------------------
-         footer
-      ---------------------------------------------- */
-
-      ".footer {",
-      "margin-top:4mm;",
-      "padding-top:2mm;",
-      "text-align:center;",
-      "color:#b49b7a;",
-      "font-size:10px;",
-      "letter-spacing:1px;",
-      "}",
-
-      "@media print {",
-
-      "html, body {",
-      "background:#dcecef !important;",
-      "}",
-
-      ".print-page {",
-      "width:210mm;",
-      "height:290mm;",
-      "min-height:290mm;",
-      "max-height:290mm;",
-      "overflow:hidden;",
-      "}",
-
-      "}",
-
-      "</style>",
-
-      "</head>",
-
-      "<body>",
-
-      '<div id="print-root"></div>',
-
-      "</body>",
-
-      "</html>"
-    ].join("")
+  const ingredients = Array.isArray(recipe.ingredients)
+    ? recipe.ingredients
+    : [];
+
+  const steps = Array.isArray(recipe.steps)
+    ? recipe.steps
+    : [];
+
+  const safe = (value) =>
+    String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+
+  const ingredientHTML = ingredients.length
+    ? ingredients
+        .map(
+          (item) => `
+            <div class="ingredient-row">
+              <span>${safe(item.name)}</span>
+              <span>${safe(item.amount)}</span>
+            </div>
+          `
+        )
+        .join("")
+    : `<div class="empty-text">暂无食材记录</div>`;
+
+  const stepHTML = steps.length
+    ? steps
+        .map(
+          (step, index) => `
+            <div class="step-item">
+              <div class="step-number">${index + 1}</div>
+              <div class="step-content">
+                ${safe(step)}
+              </div>
+            </div>
+          `
+        )
+        .join("")
+    : `<div class="empty-text">暂无步骤记录</div>`;
+
+  const photoHTML = galleryPhotos.length
+    ? `
+      <section class="print-section photo-section">
+        <h2>📷 制作照片</h2>
+        <div class="photo-grid">
+          ${galleryPhotos
+            .map(
+              (photo) => `
+                <div class="photo-box">
+                  <img src="${photo}" alt="">
+                </div>
+              `
+            )
+            .join("")}
+        </div>
+      </section>
+    `
+    : "";
+
+  printWindow.document.write(`
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+@font-face {
+  font-family: "NeedMoodNiuNiu";
+  src: url("${fontURL}") format("truetype");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: block;
+}
+
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
+html,
+body,
+* {
+  font-family: "NeedMoodNiuNiu", sans-serif !important;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+body {
+  color: #455b61;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+.print-page {
+  position: relative;
+  width: 210mm;
+  min-height: 297mm;
+  padding: 7mm;
+  margin: 0;
+  overflow: hidden;
+  break-after: page;
+  page-break-after: always;
+}
+
+.print-page:last-child {
+  break-after: auto;
+  page-break-after: auto;
+}
+
+.page-background {
+  position: absolute;
+  inset: 0;
+  width: 210mm;
+  height: 297mm;
+  object-fit: cover;
+  z-index: 0;
+  opacity: 0.72;
+}
+
+.content-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  min-height: 283mm;
+  padding: 7mm;
+  border-radius: 8mm;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(255,255,255,0.85);
+}
+
+.recipe-header {
+  text-align: center;
+  margin-bottom: 7mm;
+}
+
+.recipe-title {
+  margin: 0;
+  color: #405960;
+  font-size: 25px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+.recipe-intro {
+  margin-top: 3mm;
+  color: #70858a;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.cover-wrap {
+  width: 100%;
+  margin: 0 auto 7mm;
+  border-radius: 6mm;
+  overflow: hidden;
+  background: rgba(235,244,245,0.7);
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.cover-wrap img {
+  display: block;
+  width: 100%;
+  max-height: 72mm;
+  object-fit: contain;
+  margin: auto;
+}
+
+.recipe-info {
+  display: flex;
+  justify-content: center;
+  gap: 8mm;
+  flex-wrap: wrap;
+  margin-bottom: 7mm;
+  color: #63797e;
+  font-size: 12px;
+}
+
+.print-section {
+  margin-bottom: 7mm;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.print-section h2 {
+  margin: 0 0 4mm;
+  padding-bottom: 2mm;
+  border-bottom: 1px solid rgba(103,133,140,0.25);
+  color: #536c72;
+  font-size: 16px;
+}
+
+.ingredient-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8mm;
+  padding: 2.2mm 1mm;
+  border-bottom: 1px dashed rgba(103,133,140,0.18);
+  font-size: 12px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.empty-text {
+  color: #91a2a6;
+  font-size: 12px;
+}
+
+.step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3mm;
+}
+
+.step-item {
+  display: flex;
+  gap: 3mm;
+  align-items: flex-start;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.step-number {
+  flex: 0 0 8mm;
+  width: 8mm;
+  height: 8mm;
+  border-radius: 50%;
+  background: rgba(126,164,171,0.18);
+  color: #536c72;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+}
+
+.step-content {
+  flex: 1;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #53666b;
+}
+
+.photo-section {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4mm;
+}
+
+.photo-box {
+  min-height: 45mm;
+  max-height: 65mm;
+  border-radius: 5mm;
+  overflow: hidden;
+  background: rgba(236,244,244,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.photo-box img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 65mm;
+  object-fit: contain;
+}
+
+.print-footer {
+  margin-top: 7mm;
+  padding-top: 3mm;
+  border-top: 1px solid rgba(103,133,140,0.2);
+  text-align: center;
+  color: #8a9a9e;
+  font-size: 10px;
+}
+
+@media print {
+  html,
+  body {
+    width: 210mm;
+    margin: 0;
+    padding: 0;
+  }
+
+  .print-page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0;
+    padding: 7mm;
+  }
+}
+
+</style>
+</head>
+
+<body>
+
+<section class="print-page">
+
+  <img
+    class="page-background"
+    src="${backgroundURL}"
+    alt=""
+  >
+
+  <div class="content-card">
+
+    ${
+      coverPhoto
+        ? `
+      <div class="cover-wrap">
+        <img src="${coverPhoto}" alt="">
+      </div>
+      `
+        : ""
+    }
+
+    <header class="recipe-header">
+      <h1 class="recipe-title">${safe(recipe.title || "我的食谱")}</h1>
+
+      ${
+        recipe.intro
+          ? `<div class="recipe-intro">${safe(recipe.intro)}</div>`
+          : ""
+      }
+    </header>
+
+    <div class="recipe-info">
+      ${
+        recipe.servings
+          ? `<span>🍽 ${safe(recipe.servings)}</span>`
+          : ""
+      }
+
+      ${
+        recipe.time
+          ? `<span>⏱ ${safe(recipe.time)}</span>`
+          : ""
+      }
+
+      ${
+        recipe.category
+          ? `<span>♡ ${safe(recipe.category)}</span>`
+          : ""
+      }
+    </div>
+
+    <section class="print-section">
+      <h2>🥣 食材</h2>
+
+      <div>
+        ${ingredientHTML}
+      </div>
+    </section>
+
+    <section class="print-section">
+      <h2>👩🏻‍🍳 做法</h2>
+
+      <div class="step-list">
+        ${stepHTML}
+      </div>
+    </section>
+
+    ${photoHTML}
+
+    <div class="print-footer">
+      芳芳的小厨房日记 · My Kitchen Rose
+    </div>
+
+  </div>
+
+</section>
+
+<script>
+
+function waitForImages() {
+  const images = Array.from(document.images);
+
+  return Promise.all(
+    images.map((img) => {
+      if (img.complete) {
+        return Promise.resolve();
+      }
+
+      return new Promise((resolve) => {
+        img.onload = resolve;
+        img.onerror = resolve;
+      });
+    })
   );
+}
+
+async function preparePrint() {
+
+  try {
+    if (document.fonts && document.fonts.ready) {
+      await document.fonts.ready;
+    }
+  } catch (e) {}
+
+  await waitForImages();
+
+  setTimeout(() => {
+    window.print();
+  }, 500);
+}
+
+preparePrint();
+
+</script>
+
+</body>
+</html>
+  `);
 
   printWindow.document.close();
-
-
-  /* ==================================================
-     BUILD AFTER DOCUMENT EXISTS
-  ================================================== */
-
-  const buildPrint =
-    () => {
-
-      const doc =
-        printWindow.document;
-
-      const root =
-        doc.getElementById(
-          "print-root"
-        );
-
-
-      if (!root) {
-
-        printWindow.close();
-
-        alert(
-          "打印页面建立失败，请重新尝试。"
-        );
-
-        return;
-      }
-
-
-      /* ----------------------------------------------
-         创建一页
-      ---------------------------------------------- */
-
-      const createPage =
-        () => {
-
-          const page =
-            doc.createElement(
-              "section"
-            );
-
-          page.className =
-            "print-page";
-
-
-          const bg =
-            doc.createElement(
-              "img"
-            );
-
-          bg.className =
-            "page-background";
-
-          bg.src =
-            backgroundURL;
-
-          bg.alt =
-            "";
-
-
-          const card =
-            doc.createElement(
-              "div"
-            );
-
-          card.className =
-            "content-card";
-
-
-          page.appendChild(
-            bg
-          );
-
-          page.appendChild(
-            card
-          );
-
-          root.appendChild(
-            page
-          );
-
-
-          return {
-            page,
-            card
-          };
-
-        };
-
-
-      /* ----------------------------------------------
-         第一页
-      ---------------------------------------------- */
-
-      let current =
-        createPage();
-
-
-      const firstCard =
-        current.card;
-
-
-      /* ----------------------------------------------
-         HEADER
-      ---------------------------------------------- */
-
-      const heading =
-        doc.createElement(
-          "div"
-        );
-
-      heading.className =
-        "page-heading";
-
-      heading.textContent =
-        "MY LITTLE KITCHEN";
-
-
-      const categoryEl =
-        doc.createElement(
-          "div"
-        );
-
-      categoryEl.className =
-        "category";
-
-      categoryEl.textContent =
-        cat?.name ||
-        "";
-
-
-      const titleEl =
-        doc.createElement(
-          "h1"
-        );
-
-      titleEl.textContent =
-        recipe.title ||
-        "我的食谱";
-
-
-      firstCard.appendChild(
-        heading
-      );
-
-      firstCard.appendChild(
-        categoryEl
-      );
-
-      firstCard.appendChild(
-        titleEl
-      );
-
-
-      /* ----------------------------------------------
-         INTRO
-      ---------------------------------------------- */
-
-      if (
-        recipe.intro
-      ) {
-
-        const introEl =
-          doc.createElement(
-            "div"
-          );
-
-        introEl.className =
-          "intro";
-
-        introEl.textContent =
-          recipe.intro;
-
-
-        firstCard.appendChild(
-          introEl
-        );
-
-      }
-
-
-      /* ----------------------------------------------
-         COVER
-      ---------------------------------------------- */
-
-      if (
-        coverPhoto
-      ) {
-
-        const wrap =
-          doc.createElement(
-            "div"
-          );
-
-        wrap.className =
-          "cover-wrap";
-
-
-        const img =
-          doc.createElement(
-            "img"
-          );
-
-        img.className =
-          "cover";
-
-        img.src =
-          coverPhoto;
-
-        img.alt =
-          "";
-
-
-        wrap.appendChild(
-          img
-        );
-
-        firstCard.appendChild(
-          wrap
-        );
-
-      }
-
-
-      /* ----------------------------------------------
-         INFO GRID
-      ---------------------------------------------- */
-
-      const infoGrid =
-        doc.createElement(
-          "div"
-        );
-
-      infoGrid.className =
-        "info-grid";
-
-
-      const ingredientBox =
-        doc.createElement(
-          "section"
-        );
-
-      ingredientBox.className =
-        "info-box";
-
-
-      const ingredientTitle =
-        doc.createElement(
-          "h2"
-        );
-
-      ingredientTitle.textContent =
-        "食材";
-
-
-      const ingredientList =
-        doc.createElement(
-          "ul"
-        );
-
-
-      (
-        recipe.ingredients ||
-        []
-      ).forEach(
-        item => {
-
-          const li =
-            doc.createElement(
-              "li"
-            );
-
-          const name =
-            item?.name ||
-            "";
-
-          const amount =
-            item?.amount ||
-            "";
-
-
-          li.textContent =
-            amount
-              ? `${name} — ${amount}`
-              : name;
-
-
-          ingredientList.appendChild(
-            li
-          );
-
-        }
-      );
-
-
-      ingredientBox.appendChild(
-        ingredientTitle
-      );
-
-      ingredientBox.appendChild(
-        ingredientList
-      );
-
-
-      const timeBox =
-        doc.createElement(
-          "section"
-        );
-
-      timeBox.className =
-        "info-box";
-
-
-      const timeTitle =
-        doc.createElement(
-          "h2"
-        );
-
-      timeTitle.textContent =
-        "份量 / 时间";
-
-
-      const servingP =
-        doc.createElement(
-          "p"
-        );
-
-      servingP.textContent =
-        `份量：${recipe.servings || "—"}`;
-
-
-      const timeP =
-        doc.createElement(
-          "p"
-        );
-
-      timeP.textContent =
-        `时间：${recipe.time || "—"}`;
-
-
-      timeBox.appendChild(
-        timeTitle
-      );
-
-      timeBox.appendChild(
-        servingP
-      );
-
-      timeBox.appendChild(
-        timeP
-      );
-
-
-      infoGrid.appendChild(
-        ingredientBox
-      );
-
-      infoGrid.appendChild(
-        timeBox
-      );
-
-
-      firstCard.appendChild(
-        infoGrid
-      );
-
-
-      /* ----------------------------------------------
-         STEPS SECTION
-      ---------------------------------------------- */
-
-      let stepsSection =
-        null;
-
-
-      if (
-        recipe.steps &&
-        recipe.steps.length
-      ) {
-
-        stepsSection =
-          doc.createElement(
-            "section"
-          );
-
-        stepsSection.className =
-          "steps-section";
-
-
-        const stepsTitle =
-          doc.createElement(
-            "h2"
-          );
-
-        stepsTitle.textContent =
-          "烹饪步骤";
-
-
-        stepsSection.appendChild(
-          stepsTitle
-        );
-
-
-        firstCard.appendChild(
-          stepsSection
-        );
-
-
-        (
-          recipe.steps ||
-          []
-        ).forEach(
-          (step, index) => {
-
-            const item =
-              doc.createElement(
-                "div"
-              );
-
-            item.className =
-              "step-item";
-
-
-            const number =
-              doc.createElement(
-                "span"
-              );
-
-            number.className =
-              "step-index";
-
-            number.textContent =
-              String(
-                index + 1
-              );
-
-
-            const text =
-              doc.createElement(
-                "div"
-              );
-
-            text.className =
-              "step-text";
-
-            text.textContent =
-              step?.text ||
-              "";
-
-
-            item.appendChild(
-              number
-            );
-
-            item.appendChild(
-              text
-            );
-
-
-            stepsSection.appendChild(
-              item
-            );
-
-          }
-        );
-
-      }
-
-
-      /* ----------------------------------------------
-         PHOTO SECTION
-      ---------------------------------------------- */
-
-      let photoSection =
-        null;
-
-
-      if (
-        galleryPhotos.length
-      ) {
-
-        photoSection =
-          doc.createElement(
-            "section"
-          );
-
-        photoSection.className =
-          "photo-section";
-
-
-        const photoTitle =
-          doc.createElement(
-            "h2"
-          );
-
-        photoTitle.textContent =
-          "制作记录";
-
-
-        photoSection.appendChild(
-          photoTitle
-        );
-
-
-        firstCard.appendChild(
-          photoSection
-        );
-
-
-        /*
-         * 两张照片一组
-         */
-
-        for (
-          let i = 0;
-          i < galleryPhotos.length;
-          i += 2
-        ) {
-
-          const row =
-            doc.createElement(
-              "div"
-            );
-
-          row.className =
-            "photo-row";
-
-
-          const photo1 =
-            doc.createElement(
-              "div"
-            );
-
-          photo1.className =
-            "photo-box";
-
-
-          const img1 =
-            doc.createElement(
-              "img"
-            );
-
-          img1.src =
-            galleryPhotos[i];
-
-          img1.alt =
-            "";
-
-
-          photo1.appendChild(
-            img1
-          );
-
-
-          row.appendChild(
-            photo1
-          );
-
-
-          if (
-            galleryPhotos[i + 1]
-          ) {
-
-            const photo2 =
-              doc.createElement(
-                "div"
-              );
-
-            photo2.className =
-              "photo-box";
-
-
-            const img2 =
-              doc.createElement(
-                "img"
-              );
-
-            img2.src =
-              galleryPhotos[i + 1];
-
-            img2.alt =
-              "";
-
-
-            photo2.appendChild(
-              img2
-            );
-
-            row.appendChild(
-              photo2
-            );
-
-          }
-          else {
-
-            const empty =
-              doc.createElement(
-                "div"
-              );
-
-            empty.className =
-              "photo-box photo-empty";
-
-
-            row.appendChild(
-              empty
-            );
-
-          }
-
-
-          photoSection.appendChild(
-            row
-          );
-
-        }
-
-      }
-
-
-      /* ----------------------------------------------
-         FOOTER
-      ---------------------------------------------- */
-
-      const footer =
-        doc.createElement(
-          "div"
-        );
-
-      footer.className =
-        "footer";
-
-      footer.textContent =
-        "♡ 芳芳的小厨房日记";
-
-
-      firstCard.appendChild(
-        footer
-      );
-
-
-      /* =================================================
-         SMART PAGINATION
-      ================================================= */
-
-      /*
-       * 等浏览器完成尺寸计算
-       */
-
-      const paginate =
-        () => {
-
-          /*
-           * 找出所有真正需要流动分页的元素
-           *
-           * steps:
-           * 每个 step
-           *
-           * photos:
-           * 每一整行
-           */
-
-          const movable = [];
-
-
-          if (
-            stepsSection
-          ) {
-
-            const stepItems =
-              [
-                ...stepsSection.querySelectorAll(
-                  ".step-item"
-                )
-              ];
-
-
-            stepItems.forEach(
-              item =>
-                movable.push(
-                  {
-                    type:
-                      "step",
-                    element:
-                      item
-                  }
-                )
-            );
-
-          }
-
-
-          if (
-            photoSection
-          ) {
-
-            const photoRows =
-              [
-                ...photoSection.querySelectorAll(
-                  ".photo-row"
-                )
-              ];
-
-
-            photoRows.forEach(
-              row =>
-                movable.push(
-                  {
-                    type:
-                      "photo",
-                    element:
-                      row
-                  }
-                )
-            );
-
-          }
-
-
-          /*
-           * 现在把 steps / photos
-           * 从第一页移除。
-           */
-
-          movable.forEach(
-            item => {
-
-              if (
-                item.element.parentNode
-              ) {
-
-                item.element.remove();
-
-              }
-
-            }
-          );
-
-
-          /*
-           * 删除空的 section 标题
-           */
-
-          if (
-            stepsSection &&
-            !stepsSection.querySelector(
-              ".step-item"
-            )
-          ) {
-
-            stepsSection.remove();
-
-          }
-
-
-          if (
-            photoSection &&
-            !photoSection.querySelector(
-              ".photo-row"
-            )
-          ) {
-
-            photoSection.remove();
-
-          }
-
-
-          /*
-           * 重新创建真正的 section
-           * 每一页自己管理。
-           */
-
-          let stepPageSection =
-            null;
-
-          let photoPageSection =
-            null;
-
-
-          /*
-           * 找到 footer
-           * 暂时拿掉。
-           */
-
-          if (
-            footer.parentNode
-          ) {
-
-            footer.remove();
-
-          }
-
-
-          /*
-           * 页面高度安全值
-           */
-
-          const getAvailableHeight =
-            card => {
-
-              return (
-                card.clientHeight -
-                2
-              );
-
-            };
-
-
-          /*
-           * 判断当前 card 是否超高
-           */
-
-          const isOverflow =
-            card => {
-
-              return (
-                card.scrollHeight >
-                getAvailableHeight(
-                  card
-                )
-              );
-
-            };
-
-
-          /*
-           * 重新加入 blocks
-           */
-
-          movable.forEach(
-            item => {
-
-              const block =
-                item.element;
-
-
-              /*
-               * 如果是 step
-               */
-
-              if (
-                item.type ===
-                "step"
-              ) {
-
-                if (
-                  !stepPageSection
-                ) {
-
-                  stepPageSection =
-                    doc.createElement(
-                      "section"
-                    );
-
-                  stepPageSection.className =
-                    "steps-section";
-
-
-                  const heading =
-                    doc.createElement(
-                      "h2"
-                    );
-
-                  heading.textContent =
-                    "烹饪步骤";
-
-
-                  stepPageSection.appendChild(
-                    heading
-                  );
-
-
-                  current.card.appendChild(
-                    stepPageSection
-                  );
-
-                }
-
-
-                stepPageSection.appendChild(
-                  block
-                );
-
-
-                /*
-                 * 超出
-                 */
-
-                if (
-                  isOverflow(
-                    current.card
-                  )
-                ) {
-
-                  stepPageSection.removeChild(
-                    block
-                  );
-
-
-                  current =
-                    createPage();
-
-
-                  stepPageSection =
-                    doc.createElement(
-                      "section"
-                    );
-
-                  stepPageSection.className =
-                    "steps-section";
-
-
-                  const heading =
-                    doc.createElement(
-                      "h2"
-                    );
-
-                  heading.textContent =
-                    "烹饪步骤";
-
-
-                  stepPageSection.appendChild(
-                    heading
-                  );
-
-
-                  current.card.appendChild(
-                    stepPageSection
-                  );
-
-
-                  stepPageSection.appendChild(
-                    block
-                  );
-
-                }
-
-              }
-
-
-              /*
-               * 如果是 photo
-               */
-
-              else {
-
-                if (
-                  !photoPageSection
-                ) {
-
-                  photoPageSection =
-                    doc.createElement(
-                      "section"
-                    );
-
-                  photoPageSection.className =
-                    "photo-section";
-
-
-                  const heading =
-                    doc.createElement(
-                      "h2"
-                    );
-
-                  heading.textContent =
-                    "制作记录";
-
-
-                  photoPageSection.appendChild(
-                    heading
-                  );
-
-
-                  current.card.appendChild(
-                    photoPageSection
-                  );
-
-                }
-
-
-                photoPageSection.appendChild(
-                  block
-                );
-
-
-                /*
-                 * 一整行照片放不下
-                 */
-
-                if (
-                  isOverflow(
-                    current.card
-                  )
-                ) {
-
-                  photoPageSection.removeChild(
-                    block
-                  );
-
-
-                  current =
-                    createPage();
-
-
-                  photoPageSection =
-                    doc.createElement(
-                      "section"
-                    );
-
-                  photoPageSection.className =
-                    "photo-section";
-
-
-                  const heading =
-                    doc.createElement(
-                      "h2"
-                    );
-
-                  heading.textContent =
-                    "制作记录";
-
-
-                  photoPageSection.appendChild(
-                    heading
-                  );
-
-
-                  current.card.appendChild(
-                    photoPageSection
-                  );
-
-
-                  /*
-                   * 整行照片移动
-                   */
-
-                  photoPageSection.appendChild(
-                    block
-                  );
-
-                }
-
-              }
-
-            }
-          );
-
-
-          /*
-           * footer 永远放最后一页
-           */
-
-          current.card.appendChild(
-            footer
-          );
-
-
-          /*
-           * 如果 footer 导致超出
-           * 就把 footer 单独放下一页。
-           */
-
-          if (
-            isOverflow(
-              current.card
-            )
-          ) {
-
-            footer.remove();
-
-
-            current =
-              createPage();
-
-
-            current.card.appendChild(
-              footer
-            );
-
-          }
-
-        };
-
-
-      /*
-       * 延迟到照片实际尺寸确定后分页
-       */
-
-      setTimeout(
-        paginate,
-        250
-      );
-
-
-      /*
-       * 再等待一下
-       */
-
-      setTimeout(
-        () => {
-
-          printWindow.focus();
-
-          printWindow.print();
-
-        },
-        900
-      );
-
-    };
-
-
-  /* ==================================================
-     WAIT FOR FONT
-  ================================================== */
-
-  const waitForFont =
-    async () => {
-
-      try {
-
-        if (
-          printWindow.document.fonts
-        ) {
-
-          await
-            printWindow.document.fonts.ready;
-
-        }
-
-      } catch (error) {
-
-        console.warn(
-          "Font loading warning",
-          error
-        );
-
-      }
-
-
-      /*
-       * 等图片
-       */
-
-      const images =
-        [
-          ...printWindow.document.images
-        ];
-
-
-      await Promise.all(
-
-        images.map(
-          image => {
-
-            if (
-              image.complete
-            ) {
-
-              return Promise.resolve();
-
-            }
-
-
-            return new Promise(
-              resolve => {
-
-                image.addEventListener(
-                  "load",
-                  resolve,
-                  {
-                    once:true
-                  }
-                );
-
-                image.addEventListener(
-                  "error",
-                  resolve,
-                  {
-                    once:true
-                  }
-                );
-
-              }
-            );
-
-          }
-        )
-
-      );
-
-
-      /*
-       * 图片全部完成后建立内容
-       */
-
-      buildPrint();
-
-    };
-
-
-  waitForFont();
-
 }
-  
 
 async function shareRecipe(recipe) {
   const text = [
