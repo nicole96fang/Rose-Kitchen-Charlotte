@@ -3067,7 +3067,32 @@ body {
     border-box;
 
 }
+/* 防止食材、步骤在分页时被从中间切开 */
 
+.print-section {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.ingredient-row {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.step-item {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.recipe-header {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.cover-wrap {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
 
 /*
  * 只有后面的页面才强制开始新页
