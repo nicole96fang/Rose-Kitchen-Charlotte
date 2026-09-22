@@ -3658,7 +3658,35 @@ body {
    PRINT
    ================================================== */
 
+.back-to-recipe {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 9999;
+
+  padding: 10px 16px;
+
+  border: 1px solid rgba(90, 120, 125, 0.25);
+  border-radius: 999px;
+
+  background: rgba(255, 255, 255, 0.92);
+  color: #536c72;
+
+  font-family:
+    "NeedMoodNiuNiu",
+    sans-serif;
+
+  font-size: 14px;
+
+  box-shadow:
+    0 3px 12px rgba(70, 90, 95, 0.12);
+}
+
 @media print {
+
+  .back-to-recipe {
+    display: none !important;
+  }
 
   html,
   body {
@@ -3693,6 +3721,13 @@ body {
 
 <body>
 
+<button
+  class="back-to-recipe"
+  type="button"
+  onclick="window.close()"
+>
+  ← Back to Recipe
+</button>
 
 <!-- ==================================================
      RECIPE PAGE
