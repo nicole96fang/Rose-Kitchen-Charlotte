@@ -2938,7 +2938,7 @@ function printRecipe(recipe) {
 <html lang="zh-CN">
 
 <head>
-
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
 <meta charset="UTF-8">
 
 <meta
@@ -3859,15 +3859,123 @@ async function preparePrint() {
    */
 
   await new Promise(
-    resolve =>
-      setTimeout(
-        resolve,
-        500
-      )
-  );
+  resolve =>
+    setTimeout(
+      resolve,
+      500
+    )
+);
 
+const waitForPdfLibrary =
+  () =>
+    new Promise(
+      resolve => {
+
+        if (window.html2pdf) {
+          resolve(true);
+          return;
+        }
+
+        const started =
+          Date.now();
+
+        const timer =
+          setInterval(
+            () => {
+
+              if (
+                window.html2pdf
+              ) {
+
+                clearInterval(
+                  timer
+                );
+
+                resolve(true);
+
+                return;
+              }
+
+              if (
+                Date.now() -
+                  started >
+                5000
+              ) {
+
+                clearInterval(
+                  timer
+                );
+
+                resolve(false);
+              }
+
+            },
+            100
+          );
+      }
+    );
+
+const pdfReady =
+  await waitForPdfLibrary();
+
+if (
+  pdfReady &&
+  window.html2pdf
+) {
+
+  const pdfElement =
+    document.querySelector(
+      "body"
+    );
+
+  const options = {
+
+    margin: 0,
+
+    filename:
+      `${document.title || "recipe"}.pdf`,
+
+    image: {
+      type: "jpeg",
+      quality: 0.96
+    },
+
+    html2canvas: {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor:
+        "#ffffff",
+      logging: false
+    },
+
+    jsPDF: {
+      unit: "mm",
+      format: "a4",
+      orientation:
+        "portrait"
+    },
+
+    pagebreak: {
+      mode: [
+        "css",
+        "legacy"
+      ]
+    }
+
+  };
+
+  await window
+    .html2pdf()
+    .set(options)
+    .from(pdfElement)
+    .save();
+
+} else {
 
   window.print();
+
+}
 
 }
 
