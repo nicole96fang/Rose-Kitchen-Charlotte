@@ -3066,33 +3066,20 @@ body {
   box-sizing:
     border-box;
 
-}
-/* 防止食材、步骤在分页时被从中间切开 */
+  background-image:
+    url("${backgroundURL}");
 
-.print-section {
-  break-inside: avoid;
-  page-break-inside: avoid;
-}
+  background-size:
+    210mm 297mm;
 
-.ingredient-row {
-  break-inside: avoid;
-  page-break-inside: avoid;
-}
+  background-repeat:
+    repeat-y;
 
-.step-item {
-  break-inside: avoid;
-  page-break-inside: avoid;
+  background-position:
+    top center;
+
 }
 
-.recipe-header {
-  break-inside: avoid;
-  page-break-inside: avoid;
-}
-
-.cover-wrap {
-  break-inside: avoid;
-  page-break-inside: avoid;
-}
 
 /*
  * 只有后面的页面才强制开始新页
@@ -3129,9 +3116,8 @@ body {
    ================================================== */
 
 .page-bg {
-
-  position:
-    absolute;
+  display: none;
+}
 
   left:
     0;
