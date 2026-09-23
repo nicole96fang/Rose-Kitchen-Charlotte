@@ -2212,7 +2212,7 @@ function renderProfile(state) {
 
       <section class="profile-recipe-card profile-recipe-image-card">
   <img
-    src="./assets/profile-recipe-card.jpg"
+    src="./assets/profile-recipe-card.JPG"
     alt="芳芳的小厨房日记"
   />
 </section>
