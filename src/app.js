@@ -3988,21 +3988,123 @@ async function shareRecipe(recipe) {
 function fileToDataURL(file) {
   return new Promise(
     (resolve, reject) => {
-      const reader =
-        new FileReader();
 
-      reader.onload =
-        () =>
-          resolve(
-            reader.result
+      const objectURL =
+        URL.createObjectURL(file);
+
+      const image =
+        new Image();
+
+      image.onload =
+        () => {
+
+          try {
+
+            const maxSize = 1800;
+
+            let width =
+              image.naturalWidth;
+
+            let height =
+              image.naturalHeight;
+
+            if (
+              width >
+                maxSize ||
+              height >
+                maxSize
+            ) {
+
+              const scale =
+                Math.min(
+                  maxSize / width,
+                  maxSize / height
+                );
+
+              width =
+                Math.round(
+                  width * scale
+                );
+
+              height =
+                Math.round(
+                  height * scale
+                );
+
+            }
+
+            const canvas =
+              document.createElement(
+                "canvas"
+              );
+
+            canvas.width =
+              width;
+
+            canvas.height =
+              height;
+
+            const context =
+              canvas.getContext(
+                "2d"
+              );
+
+            context.drawImage(
+              image,
+              0,
+              0,
+              width,
+              height
+            );
+
+            const compressed =
+              canvas.toDataURL(
+                "image/jpeg",
+                0.82
+              );
+
+            URL.revokeObjectURL(
+              objectURL
+            );
+
+            resolve(
+              compressed
+            );
+
+          } catch (
+            error
+          ) {
+
+            URL.revokeObjectURL(
+              objectURL
+            );
+
+            reject(
+              error
+            );
+
+          }
+
+        };
+
+      image.onerror =
+        () => {
+
+          URL.revokeObjectURL(
+            objectURL
           );
 
-      reader.onerror =
-        reject;
+          reject(
+            new Error(
+              "照片无法读取"
+            )
+          );
 
-      reader.readAsDataURL(
-        file
-      );
+        };
+
+      image.src =
+        objectURL;
+
     }
   );
 }
