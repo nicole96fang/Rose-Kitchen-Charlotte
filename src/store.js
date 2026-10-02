@@ -99,31 +99,46 @@ async function readDB() {
   }
 }
 
+
 async function writeDB(state) {
-  try {
-    const db = await openDB();
+  const db = await openDB();
 
-    await new Promise((resolve, reject) => {
-      const tx = db.transaction(
-        STORE_NAME,
-        "readwrite"
-      );
-
-      tx.objectStore(STORE_NAME).put(
-        state,
-        "state"
-      );
-
-      tx.oncomplete = resolve;
-      tx.onerror = () => reject(tx.error);
-    });
-  } catch {
-    localStorage.setItem(
-      DB_NAME,
-      JSON.stringify(state)
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction(
+      STORE_NAME,
+      "readwrite"
     );
-  }
+
+    tx.objectStore(STORE_NAME).put(
+      state,
+      "state"
+    );
+
+    tx.oncomplete = () => {
+      db.close();
+      resolve();
+    };
+
+    tx.onerror = () => {
+      const error =
+        tx.error ||
+        new Error("IndexedDB 写入失败");
+
+      db.close();
+      reject(error);
+    };
+
+    tx.onabort = () => {
+      const error =
+        tx.error ||
+        new Error("IndexedDB 储存空间不足或交易中断");
+
+      db.close();
+      reject(error);
+    };
+  });
 }
+
 
 function uid(prefix = "id") {
   return `${prefix}_${Date.now().toString(36)}_${Math.random()
@@ -208,22 +223,27 @@ export function createStore() {
         listeners.delete(fn);
     },
 
-    async setState(next) {
-      state =
-        normalizeState(
-          typeof next === "function"
-            ? next(state)
-            : next
-        );
+    
+async setState(next) {
+  const nextState =
+    normalizeState(
+      typeof next === "function"
+        ? next(state)
+        : next
+    );
 
-      await writeDB(state);
+  // 先确认写入成功，再更新内存状态
+  await writeDB(nextState);
 
-      listeners.forEach(
-        fn => fn(state)
-      );
+  state = nextState;
 
-      return state;
-    },
+  listeners.forEach(
+    fn => fn(state)
+  );
+
+  return state;
+},
+
 
     async upsertRecipe(recipe) {
       const next = {
