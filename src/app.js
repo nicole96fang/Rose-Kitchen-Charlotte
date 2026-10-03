@@ -1,7 +1,7 @@
 import {
   createStore,
   blankRecipe
-} from "./store.js";
+} from "./store.js?v=2";
 
 const store = createStore();
 
