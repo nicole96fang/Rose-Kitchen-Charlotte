@@ -1,7 +1,7 @@
 import {
   createStore,
   blankRecipe
-} from "./store.js?v=6";
+} from "./store.js?v=7";
 
 const store = createStore();
 
@@ -3794,10 +3794,10 @@ body {
     center;
 
   gap:
-    8mm;
+    5mm;
 
   padding:
-    1.8mm 1mm;
+    0.6mm 1mm;
 
   border-bottom:
     1px dashed
@@ -3811,6 +3811,9 @@ body {
   font-size:
     12px;
 
+  line-height:
+    1.35;
+
 }
 
 
@@ -3818,6 +3821,9 @@ body {
 
   flex:
     1;
+
+  line-height:
+    1.35;
 
 }
 
@@ -3829,6 +3835,12 @@ body {
 
   text-align:
     right;
+
+  line-height:
+    1.35;
+
+  white-space:
+    nowrap;
 
 }
 
