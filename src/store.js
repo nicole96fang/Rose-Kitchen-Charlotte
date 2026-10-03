@@ -9,9 +9,16 @@ const LS_KEY = DB_NAME;
 // iOS Safari 在「无痕浏览 / 阻止跨站跟踪」下，open 请求可能既不 success
 // 也不 error，而是永久挂起 —— 这会让保存按钮看起来「点了没反应」。
 // 所以必须自带超时，超时后立刻降级到 localStorage。
-const DB_TIMEOUT = 3000;
+// 放宽到 6 秒：主屏书签容器首次建库偏慢，太短会误判成「不可用」
+// 而降级到 localStorage，反而更容易撑爆内存。
+const DB_TIMEOUT = 6000;
 
-// 运行期标记：一旦 IndexedDB 被证明不可用，后续直接走兜底，避免每次保存都卡 3 秒
+// localStorage 安全字符数上限。
+// 配额名义 5MB，但 iOS 主屏书签容器里序列化大字符串会瞬间拉高内存峰值
+// 并导致闪退，所以留出很大余量，超过就直接改用精简版。
+const LS_SAFE_CHARS = 1500000;
+
+// 运行期标记：一旦 IndexedDB 被证明不可用，后续直接走兜底，避免每次保存都卡住
 let indexedDBAvailable = true;
 
 // iOS Safari 15.4 以下没有 structuredClone。
@@ -243,6 +250,34 @@ async function writeDB(state) {
   });
 }
 
+// 估算照片/封面占用的字符数。
+// 只累加长度、不做序列化，所以本身几乎不耗内存，
+// 可以在真正 stringify 之前就判断「这数据能不能安全塞进 localStorage」。
+function photoBytes(state) {
+  let n = 0;
+
+  for (const recipe of state.recipes || []) {
+    for (const photo of recipe.photos || []) {
+      if (typeof photo === "string") {
+        n += photo.length;
+      }
+    }
+
+    if (typeof recipe.cover === "string") {
+      n += recipe.cover.length;
+    }
+  }
+
+  const avatar =
+    state.profile && state.profile.avatar;
+
+  if (typeof avatar === "string") {
+    n += avatar.length;
+  }
+
+  return n;
+}
+
 // 去掉照片的精简版本，用于空间不足时的最后抢救
 function slimState(state) {
   return {
@@ -284,33 +319,46 @@ async function persist(state) {
     indexedDBAvailable = false;
   }
 
-  try {
-    localStorage.setItem(
-      LS_KEY,
-      JSON.stringify(state)
-    );
+  // 照片多的时候绝不能做完整序列化：
+  // JSON.stringify 会一次性生成一个几十 MB 的字符串，
+  // 在 iOS 主屏书签容器里就是「点保存 → 闪退回主屏幕」。
+  const heavy =
+    photoBytes(state) > LS_SAFE_CHARS;
 
-    return {
-      ok: true,
-      channel: "localstorage"
-    };
-  } catch {
-    // 多半是空间不足（照片太多）
+  if (!heavy) {
+    try {
+      localStorage.setItem(
+        LS_KEY,
+        JSON.stringify(state)
+      );
+
+      return {
+        ok: true,
+        channel: "localstorage"
+      };
+    } catch {
+      // 多半是空间不足
+    }
   }
 
+  // 精简版：丢掉照片，保住菜谱文字
   try {
-    const slim = slimState(state);
-
-    localStorage.setItem(
-      LS_KEY,
-      JSON.stringify(slim)
+    const text = JSON.stringify(
+      slimState(state)
     );
 
-    return {
-      ok: true,
-      channel: "localstorage-slim",
-      slim: true
-    };
+    if (text.length <= LS_SAFE_CHARS) {
+      localStorage.setItem(
+        LS_KEY,
+        text
+      );
+
+      return {
+        ok: true,
+        channel: "localstorage-slim",
+        slim: true
+      };
+    }
   } catch {
     // 彻底没救
   }
@@ -583,17 +631,54 @@ async setState(next) {
     async exportBackup() {
       await ready;
 
+      const filename =
+        `芳芳的小厨房日记-备份-${new Date()
+          .toISOString()
+          .slice(0, 10)}.json`;
+
+      const json =
+        JSON.stringify(state, null, 2);
+
+      // iOS（尤其是主屏书签容器）不具备网页下载能力。
+      // 用 a.click() + download 会把整个容器切走甚至杀掉，
+      // 表现就是「点了备份 → 闪退回主屏幕」。
+      // 因此优先交给系统分享面板，由 iOS 原生接管存档。
+      try {
+        const file =
+          new File([json], filename, {
+            type: "application/json"
+          });
+
+        if (
+          navigator.canShare &&
+          navigator.canShare({
+            files: [file]
+          })
+        ) {
+          await navigator.share({
+            files: [file],
+            title: filename
+          });
+
+          return "shared";
+        }
+      } catch (error) {
+        // 用户主动取消分享，不算失败
+        if (
+          error &&
+          error.name === "AbortError"
+        ) {
+          return "cancelled";
+        }
+
+        // 其他错误则回退到下面的下载方式
+      }
+
+      // 桌面浏览器 / 不支持分享时，保留原来的下载方式
       const blob = new Blob(
-        [
-          JSON.stringify(
-            state,
-            null,
-            2
-          )
-        ],
+        [json],
         {
-          type:
-            "application/json"
+          type: "application/json"
         }
       );
 
@@ -609,10 +694,7 @@ async setState(next) {
 
       a.href = url;
 
-      a.download =
-        `芳芳的小厨房日记-备份-${new Date()
-          .toISOString()
-          .slice(0, 10)}.json`;
+      a.download = filename;
 
       document.body.appendChild(a);
 
@@ -627,6 +709,8 @@ async setState(next) {
           ),
         1000
       );
+
+      return "downloaded";
     },
 
     async importBackup(file) {

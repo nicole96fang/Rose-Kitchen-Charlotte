@@ -2383,7 +2383,39 @@ function renderProfile(state) {
   ====================================== */
 
   $("#backup-data").onclick =
-    () => store.exportBackup();
+    async () => {
+      let result;
+
+      try {
+        result =
+          await store.exportBackup();
+      } catch (error) {
+        console.error(error);
+
+        alert(
+          "备份没能完成 ♡\n\n" +
+            "如果在主屏图标里一直失败，\n" +
+            "请改用 Safari 打开同一个网址再试一次。"
+        );
+
+        return;
+      }
+
+      if (result === "shared") {
+        // iOS 已接管，不需要额外提示
+        return;
+      }
+
+      if (result === "cancelled") {
+        return;
+      }
+
+      alert(
+        "备份文件已下载 ♡\n\n" +
+          "建议另外存一份到备忘录或网盘，\n" +
+          "换设备或清理浏览器时还能找回。"
+      );
+    };
 
 
   /* =====================================
