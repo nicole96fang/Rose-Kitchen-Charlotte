@@ -650,12 +650,9 @@ async setState(next) {
       return {
         filename,
 
+        // 不带缩进：备份文件是给机器读的，缩进会让体积和耗时翻倍
         json:
-          JSON.stringify(
-            source,
-            null,
-            2
-          ),
+          JSON.stringify(source),
 
         slim,
 

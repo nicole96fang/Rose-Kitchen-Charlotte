@@ -5434,3 +5434,18 @@ body {
 
   margin-top: 10px;
 }
+
+.backup-version {
+  margin:
+    14px
+    0
+    0;
+
+  text-align: center;
+
+  color: #d3dbdc;
+
+  font-size: 10px;
+
+  letter-spacing: 1px;
+}

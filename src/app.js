@@ -1,7 +1,7 @@
 import {
   createStore,
   blankRecipe
-} from "./store.js?v=5";
+} from "./store.js?v=6";
 
 const store = createStore();
 
@@ -2489,9 +2489,6 @@ function renderProfile(state) {
         );
     }
 
-    let current =
-      await store.buildBackup({ slim });
-
     const modal =
       document.createElement("div");
 
@@ -2553,9 +2550,15 @@ function renderProfile(state) {
           }
         </button>
 
+        <p class="backup-version">
+          备份面板 v6
+        </p>
+
       </div>
     `;
 
+    // 先把面板亮出来，再去做耗时的序列化。
+    // 否则 iOS 会先埋头算好几秒，用户看着就是「点了没反应」。
     document.body.appendChild(modal);
 
     const textarea =
@@ -2566,6 +2569,38 @@ function renderProfile(state) {
 
     const hint =
       modal.querySelector("#backup-hint");
+
+    textarea.value = "正在准备备份内容…";
+
+    meta.textContent = slim
+      ? "精简版（不含照片）"
+      : "完整版（含照片）";
+
+    hint.textContent =
+      "数据整理好会自动更新这里 ♡";
+
+    // 让浏览器有机会把上面这一帧画出来
+    await new Promise(resolve =>
+      setTimeout(resolve, 60)
+    );
+
+    let current;
+
+    try {
+      current =
+        await store.buildBackup({ slim });
+    } catch (error) {
+      console.error(error);
+
+      modal.remove();
+
+      alert(
+        "备份内容没能整理出来 ♡\n\n" +
+          "请关掉重新打开一次再试。"
+      );
+
+      return;
+    }
 
     function paint() {
       textarea.value =
