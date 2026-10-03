@@ -6,8 +6,11 @@
 @font-face {
   font-family: "NeedMoodNiuNiu";
 
-  src: url("../assets/fonts/泥木扭扭体NeedMood NiuNiu.ttf")
-    format("truetype");
+  src:
+    url("../assets/fonts/NeedMood NiuNiu.woff2")
+      format("woff2"),
+    url("../assets/fonts/泥木扭扭体NeedMood NiuNiu.ttf")
+      format("truetype");
 
   font-style: normal;
   font-weight: 100 900;
