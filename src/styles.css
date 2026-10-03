@@ -5426,3 +5426,11 @@ body {
 
   word-break: break-all;
 }
+
+.backup-sheet-text.faint {
+  color: #9aa9ab;
+
+  font-size: 11px;
+
+  margin-top: 10px;
+}

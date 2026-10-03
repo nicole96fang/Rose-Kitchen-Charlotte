@@ -1,7 +1,7 @@
 import {
   createStore,
   blankRecipe
-} from "./store.js?v=4";
+} from "./store.js?v=5";
 
 const store = createStore();
 
@@ -2384,7 +2384,11 @@ function renderProfile(state) {
 
   // 照片以 base64 文本形式存在数据里，一张动辄几百 KB 字符。
   // 主屏容器内存紧张，超过这个体量就默认只备份菜谱文字。
-  const BIG_BACKUP_CHARS = 3000000;
+  const BIG_BACKUP_CHARS = 2000000;
+  // 超过这个体积 textarea 都没法安全显示预览，直接强制精简版
+  const FORCE_SLIM_CHARS = 8000000;
+  // textarea 预览只显示前这么多字符，完整内容存在内存里
+  const PREVIEW_CHARS = 4000;
 
   function isWebClip() {
     return document.documentElement.classList.contains(
@@ -2392,42 +2396,46 @@ function renderProfile(state) {
     );
   }
 
-  async function copyToClipboard(
-    text,
-    textarea
-  ) {
+  async function copyToClipboard(text) {
     try {
       if (
         navigator.clipboard &&
         window.isSecureContext
       ) {
-        await navigator.clipboard.writeText(
-          text
-        );
-
+        await navigator.clipboard.writeText(text);
         return true;
       }
     } catch {
       // 继续尝试老办法
     }
 
+    // 回退：用临时隐藏 textarea 装完整文本，避免污染页面上的预览框
     try {
-      textarea.removeAttribute("readonly");
+      const tmp =
+        document.createElement("textarea");
 
-      textarea.focus();
+      tmp.value = text;
 
-      textarea.setSelectionRange(
-        0,
-        text.length
+      tmp.setAttribute(
+        "readonly",
+        "readonly"
       );
+
+      tmp.style.position = "fixed";
+      tmp.style.top = "0";
+      tmp.style.left = "0";
+      tmp.style.opacity = "0";
+
+      document.body.appendChild(tmp);
+
+      tmp.focus();
+
+      tmp.select();
 
       const ok =
         document.execCommand("copy");
 
-      textarea.setAttribute(
-        "readonly",
-        "readonly"
-      );
+      tmp.remove();
 
       return ok;
     } catch {
@@ -2435,21 +2443,47 @@ function renderProfile(state) {
     }
   }
 
+  function formatCharCount(n) {
+    return n.toLocaleString("zh-CN");
+  }
+
+  function renderPreview(json) {
+    if (json.length <= PREVIEW_CHARS) {
+      return json;
+    }
+
+    return (
+      json.slice(0, PREVIEW_CHARS) +
+      "\n\n…（后面 " +
+      formatCharCount(
+        json.length - PREVIEW_CHARS
+      ) +
+      " 字符已就绪，点下面按钮全部拷走）"
+    );
+  }
+
   // 主屏书签里唯一可靠的备份方式：
-  // 把 JSON 直接显示在页面内，让用户自己拷贝走。
+  // 把 JSON 显示在页面内（只显示前几千字符预览），让用户自己拷贝走。
+  // 完整内容存在 current.json 变量里，按下「拷贝」按钮才送进剪贴板。
   // 全程不触发下载、不调用分享面板 —— 容器不会被切走，也就不会闪退。
   async function openWebClipBackup() {
     let slim = false;
 
-    if (
-      store.estimateBackupSize() >
-      BIG_BACKUP_CHARS
-    ) {
+    let forceSlim = false;
+
+    const estimate =
+      store.estimateBackupSize();
+
+    if (estimate > FORCE_SLIM_CHARS) {
+      slim = true;
+
+      forceSlim = true;
+    } else if (estimate > BIG_BACKUP_CHARS) {
       slim =
         !confirm(
           "食谱里的照片比较多 ♡\n\n" +
             "在主屏图标里备份完整版（含照片）\n" +
-            "可能会因为内存不足而退出。\n\n" +
+            "可能因为体积太大而无法显示预览。\n\n" +
             "点「确定」备份完整版，\n" +
             "点「取消」只备份菜谱文字（推荐）。"
         );
@@ -2478,21 +2512,26 @@ function renderProfile(state) {
           备份食谱 ♡
         </h2>
 
-        <p>
+        <p class="backup-sheet-text">
           主屏图标里没法直接下载文件，
           所以这里改成「拷贝文字」的方式。
         </p>
 
-        <p>
-          点下面的按钮把内容全部拷走，
-          再粘贴到备忘录或发给自己就好。
-        </p>
+        <p
+          class="backup-sheet-text"
+          id="backup-meta"
+        ></p>
 
         <textarea
           id="backup-text"
           readonly
           rows="6"
         ></textarea>
+
+        <p
+          class="backup-sheet-text faint"
+          id="backup-hint"
+        ></p>
 
         <button
           class="backup-sheet-button"
@@ -2522,7 +2561,33 @@ function renderProfile(state) {
     const textarea =
       modal.querySelector("#backup-text");
 
-    textarea.value = current.json;
+    const meta =
+      modal.querySelector("#backup-meta");
+
+    const hint =
+      modal.querySelector("#backup-hint");
+
+    function paint() {
+      textarea.value =
+        renderPreview(current.json);
+
+      meta.textContent =
+        "共 " +
+        formatCharCount(current.json.length) +
+        " 字符" +
+        (current.slim
+          ? "（精简版，不含照片）"
+          : "（完整版）");
+
+      hint.textContent =
+        current.json.length > PREVIEW_CHARS
+          ? "这里只显示前 " +
+            formatCharCount(PREVIEW_CHARS) +
+            " 字预览。完整内容已就绪，点下面按钮全部拷走 ♡"
+          : "点下面按钮把内容全部拷走 ♡";
+    }
+
+    paint();
 
     modal.querySelector(
       "#backup-close"
@@ -2537,48 +2602,67 @@ function renderProfile(state) {
     modal.querySelector(
       "#backup-copy"
     ).onclick = async () => {
+      const button =
+        modal.querySelector("#backup-copy");
+
+      button.disabled = true;
+
+      button.textContent = "正在拷贝…";
+
       const ok =
-        await copyToClipboard(
-          current.json,
-          textarea
-        );
+        await copyToClipboard(current.json);
+
+      button.disabled = false;
+
+      button.textContent = "拷贝全部内容";
 
       alert(
         ok
-          ? "已经拷好啦 ♡\n\n粘贴到备忘录或发给自己，\n就多了一份保险。"
+          ? "已经拷好啦 ♡\n\n打开备忘录或微信，\n长按粘贴就能存下来。"
           : "自动拷贝没成功 ♡\n\n请手动长按上面的文本框 →\n全选 → 拷贝，再粘到备忘录里。"
       );
     };
 
-    modal.querySelector(
-      "#backup-toggle"
-    ).onclick = async () => {
-      const button =
-        modal.querySelector(
-          "#backup-toggle"
-        );
+    if (forceSlim) {
+      // 强制精简版时，隐藏切换按钮避免用户再去尝试完整版
+      const toggleBtn =
+        modal.querySelector("#backup-toggle");
 
-      button.disabled = true;
+      toggleBtn.style.display = "none";
 
-      button.textContent = "正在生成…";
+      meta.textContent +=
+        "\n数据太大已自动精简 ♡";
+    } else {
+      modal.querySelector(
+        "#backup-toggle"
+      ).onclick = async () => {
+        const button =
+          modal.querySelector(
+            "#backup-toggle"
+          );
 
-      try {
-        current =
-          await store.buildBackup({
-            slim: !current.slim
-          });
+        button.disabled = true;
 
-        textarea.value = current.json;
+        button.textContent = "正在生成…";
 
-        button.textContent = current.slim
-          ? "改成完整版（含照片）"
-          : "改成精简版（不含照片）";
-      } catch {
-        alert("切换失败，请关闭后重试 ♡");
-      }
+        try {
+          current =
+            await store.buildBackup({
+              slim: !current.slim
+            });
 
-      button.disabled = false;
-    };
+          paint();
+
+          button.textContent = current.slim
+            ? "改成完整版（含照片）"
+            : "改成精简版（不含照片）";
+        } catch {
+          alert("切换失败，请关闭后重试 ♡");
+        }
+
+        button.disabled = false;
+      };
+    }
   }
 
   $("#backup-data").onclick =
