@@ -1,7 +1,7 @@
 import {
   createStore,
   blankRecipe
-} from "./store.js?v=7";
+} from "./store.js?v=8";
 
 const store = createStore();
 
@@ -3059,11 +3059,14 @@ function printRecipe(recipe) {
   const ingredientHTML =
     ingredients.length
 
-      ? ingredients
+      ? `<div class="ingredient-grid">`
+
+        +
+        ingredients
           .map(
             item => `
 
-              <div class="ingredient-row">
+              <div class="ingredient-cell">
 
                 <span class="ingredient-name">
                   ${safe(
@@ -3082,6 +3085,9 @@ function printRecipe(recipe) {
             `
           )
           .join("")
+
+        +
+        `</div>`
 
       : `
 
@@ -3779,10 +3785,42 @@ body {
 
 
 /* ==================================================
-   INGREDIENT
+   INGREDIENT — 两列布局，中间一条竖分割线
    ================================================== */
 
-.ingredient-row {
+.ingredient-grid {
+
+  display:
+    grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  column-gap:
+    0;
+
+  border-top:
+    1px solid
+    rgba(
+      103,
+      133,
+      140,
+      0.22
+    );
+
+  border-bottom:
+    1px solid
+    rgba(
+      103,
+      133,
+      140,
+      0.22
+    );
+
+}
+
+
+.ingredient-cell {
 
   display:
     flex;
@@ -3794,10 +3832,10 @@ body {
     center;
 
   gap:
-    5mm;
+    2mm;
 
   padding:
-    0.6mm 1mm;
+    0.9mm 5mm;
 
   border-bottom:
     1px dashed
@@ -3805,7 +3843,7 @@ body {
       103,
       133,
       140,
-      0.18
+      0.16
     );
 
   font-size:
@@ -3817,6 +3855,41 @@ body {
 }
 
 
+/* 左边一列：右边加竖线，把左右两列分开 */
+
+.ingredient-cell:nth-child(
+  odd
+) {
+
+  border-right:
+    1px solid
+    rgba(
+      103,
+      133,
+      140,
+      0.28
+    );
+
+}
+
+
+/* 最后一行：去掉底部 dashed，避免双线 */
+
+.ingredient-grid
+  > .ingredient-cell:last-child,
+.ingredient-grid
+  > .ingredient-cell:nth-last-child(
+    2
+  ):nth-child(
+    odd
+  ) {
+
+  border-bottom:
+    none;
+
+}
+
+
 .ingredient-name {
 
   flex:
@@ -3824,6 +3897,9 @@ body {
 
   line-height:
     1.35;
+
+  overflow-wrap:
+    anywhere;
 
 }
 
@@ -3841,6 +3917,9 @@ body {
 
   white-space:
     nowrap;
+
+  color:
+    #6a8388;
 
 }
 
