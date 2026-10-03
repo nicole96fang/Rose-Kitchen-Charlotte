@@ -5366,3 +5366,63 @@ body {
 .webclip-mode .profile-stats-four {
   background: #fdfdf9;
 }
+
+/* 主屏书签里的备份面板 */
+.backup-sheet-button {
+  min-height: 50px;
+
+  width: 100%;
+
+  margin-top: 12px;
+
+  padding:
+    12px
+    20px;
+
+  border-radius: 999px;
+
+  color: white;
+
+  background:
+    linear-gradient(
+      135deg,
+      #cfa2a5,
+      #dcb6b6
+    );
+
+  box-shadow:
+    0 6px 15px
+    rgba(180, 135, 140, 0.2);
+
+  font-size: 15px;
+
+  font-weight: 600;
+}
+
+.backup-sheet-button.ghost {
+  color: #8a7069;
+
+  background: #f2f6f6;
+
+  box-shadow: none;
+
+  font-weight: 500;
+}
+
+.backup-sheet-button:disabled {
+  opacity: 0.6;
+}
+
+#backup-text {
+  margin-top: 14px;
+
+  font-family:
+    ui-monospace,
+    monospace;
+
+  font-size: 11px;
+
+  line-height: 1.5;
+
+  word-break: break-all;
+}

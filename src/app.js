@@ -1,7 +1,7 @@
 import {
   createStore,
   blankRecipe
-} from "./store.js?v=3";
+} from "./store.js?v=4";
 
 const store = createStore();
 
@@ -2382,8 +2382,225 @@ function renderProfile(state) {
      BACKUP
   ====================================== */
 
+  // 照片以 base64 文本形式存在数据里，一张动辄几百 KB 字符。
+  // 主屏容器内存紧张，超过这个体量就默认只备份菜谱文字。
+  const BIG_BACKUP_CHARS = 3000000;
+
+  function isWebClip() {
+    return document.documentElement.classList.contains(
+      "webclip-mode"
+    );
+  }
+
+  async function copyToClipboard(
+    text,
+    textarea
+  ) {
+    try {
+      if (
+        navigator.clipboard &&
+        window.isSecureContext
+      ) {
+        await navigator.clipboard.writeText(
+          text
+        );
+
+        return true;
+      }
+    } catch {
+      // 继续尝试老办法
+    }
+
+    try {
+      textarea.removeAttribute("readonly");
+
+      textarea.focus();
+
+      textarea.setSelectionRange(
+        0,
+        text.length
+      );
+
+      const ok =
+        document.execCommand("copy");
+
+      textarea.setAttribute(
+        "readonly",
+        "readonly"
+      );
+
+      return ok;
+    } catch {
+      return false;
+    }
+  }
+
+  // 主屏书签里唯一可靠的备份方式：
+  // 把 JSON 直接显示在页面内，让用户自己拷贝走。
+  // 全程不触发下载、不调用分享面板 —— 容器不会被切走，也就不会闪退。
+  async function openWebClipBackup() {
+    let slim = false;
+
+    if (
+      store.estimateBackupSize() >
+      BIG_BACKUP_CHARS
+    ) {
+      slim =
+        !confirm(
+          "食谱里的照片比较多 ♡\n\n" +
+            "在主屏图标里备份完整版（含照片）\n" +
+            "可能会因为内存不足而退出。\n\n" +
+            "点「确定」备份完整版，\n" +
+            "点「取消」只备份菜谱文字（推荐）。"
+        );
+    }
+
+    let current =
+      await store.buildBackup({ slim });
+
+    const modal =
+      document.createElement("div");
+
+    modal.className = "modal-backdrop";
+
+    modal.innerHTML = `
+      <div class="bottom-sheet">
+
+        <button
+          class="sheet-close"
+          id="backup-close"
+          type="button"
+        >
+          ✕
+        </button>
+
+        <h2>
+          备份食谱 ♡
+        </h2>
+
+        <p>
+          主屏图标里没法直接下载文件，
+          所以这里改成「拷贝文字」的方式。
+        </p>
+
+        <p>
+          点下面的按钮把内容全部拷走，
+          再粘贴到备忘录或发给自己就好。
+        </p>
+
+        <textarea
+          id="backup-text"
+          readonly
+          rows="6"
+        ></textarea>
+
+        <button
+          class="backup-sheet-button"
+          id="backup-copy"
+          type="button"
+        >
+          拷贝全部内容
+        </button>
+
+        <button
+          class="backup-sheet-button ghost"
+          id="backup-toggle"
+          type="button"
+        >
+          ${
+            slim
+              ? "改成完整版（含照片）"
+              : "改成精简版（不含照片）"
+          }
+        </button>
+
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    const textarea =
+      modal.querySelector("#backup-text");
+
+    textarea.value = current.json;
+
+    modal.querySelector(
+      "#backup-close"
+    ).onclick = () => modal.remove();
+
+    modal.onclick = event => {
+      if (event.target === modal) {
+        modal.remove();
+      }
+    };
+
+    modal.querySelector(
+      "#backup-copy"
+    ).onclick = async () => {
+      const ok =
+        await copyToClipboard(
+          current.json,
+          textarea
+        );
+
+      alert(
+        ok
+          ? "已经拷好啦 ♡\n\n粘贴到备忘录或发给自己，\n就多了一份保险。"
+          : "自动拷贝没成功 ♡\n\n请手动长按上面的文本框 →\n全选 → 拷贝，再粘到备忘录里。"
+      );
+    };
+
+    modal.querySelector(
+      "#backup-toggle"
+    ).onclick = async () => {
+      const button =
+        modal.querySelector(
+          "#backup-toggle"
+        );
+
+      button.disabled = true;
+
+      button.textContent = "正在生成…";
+
+      try {
+        current =
+          await store.buildBackup({
+            slim: !current.slim
+          });
+
+        textarea.value = current.json;
+
+        button.textContent = current.slim
+          ? "改成完整版（含照片）"
+          : "改成精简版（不含照片）";
+      } catch {
+        alert("切换失败，请关闭后重试 ♡");
+      }
+
+      button.disabled = false;
+    };
+  }
+
   $("#backup-data").onclick =
     async () => {
+      // 主屏书签（Web Clip）里，下载和分享都会把容器切走，
+      // 表现就是闪退回主屏幕。所以这里走完全独立的路径。
+      if (isWebClip()) {
+        try {
+          await openWebClipBackup();
+        } catch (error) {
+          console.error(error);
+
+          alert(
+            "备份没能完成 ♡\n\n" +
+              "请先关掉重新打开一次，\n" +
+              "或改用 Safari 打开同一个网址再试。"
+          );
+        }
+
+        return;
+      }
+
       let result;
 
       try {

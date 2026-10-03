@@ -628,6 +628,54 @@ async setState(next) {
       );
     },
 
+    // 只生成备份文本，不触发任何系统动作（不下载、不分享）。
+    //
+    // iOS 主屏书签容器必须用这条路径：
+    //   a.click() + download  → 容器被切走/杀掉（闪退回主屏幕）
+    //   navigator.share()     → 在 Web Clip 里支持不稳定，且同样会切走容器
+    // 只有「把文本放进页面里让用户自己拷贝」是绝对安全的。
+    async buildBackup({
+      slim = false
+    } = {}) {
+      await ready;
+
+      const source =
+        slim ? slimState(state) : state;
+
+      const filename =
+        `芳芳的小厨房日记-备份-${new Date()
+          .toISOString()
+          .slice(0, 10)}.json`;
+
+      return {
+        filename,
+
+        json:
+          JSON.stringify(
+            source,
+            null,
+            2
+          ),
+
+        slim,
+
+        photoCount:
+          (state.recipes || []).reduce(
+            (n, r) =>
+              n +
+              (r.photos
+                ? r.photos.length
+                : 0),
+            0
+          )
+      };
+    },
+
+    // 不做序列化，只估算照片体积，用于在生成巨大字符串之前判断风险
+    estimateBackupSize() {
+      return photoBytes(state);
+    },
+
     async exportBackup() {
       await ready;
 
