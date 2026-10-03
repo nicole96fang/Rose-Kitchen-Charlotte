@@ -1,7 +1,7 @@
 import {
   createStore,
   blankRecipe
-} from "./store.js?v=2";
+} from "./store.js?v=3";
 
 const store = createStore();
 
@@ -15,6 +15,21 @@ let currentPage = "home";
 let currentCategory = null;
 let editingRecipe = null;
 let searchText = "";
+
+// iOS 主屏书签（Web Clip）是一个独立容器，内存配额远小于 Safari。
+// backdrop-filter 毛玻璃需要实时合成整屏背景并常驻离屏缓冲，
+// 在该容器里会持续挤压内存直至被系统杀掉（表现为闪退）。
+// 因此只在 Web Clip 模式下自动降级为实色；Safari 中视觉完全不变。
+if (
+  window.navigator.standalone === true ||
+  window.matchMedia(
+    "(display-mode: standalone)"
+  ).matches
+) {
+  document.documentElement.classList.add(
+    "webclip-mode"
+  );
+}
 
 const app = document.createElement("div");
 app.id = "app";

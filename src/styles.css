@@ -5331,3 +5331,38 @@ body {
   }
 
 }
+
+/* =========================================
+   iOS 主屏书签（Web Clip）内存保护
+   -----------------------------------------
+   该容器内存配额远小于 Safari，毛玻璃的离屏合成
+   会把内存吃光并导致闪退。此处仅在 Web Clip 模式下
+   关闭 backdrop-filter，改用观感一致的实色替代。
+   Safari / 桌面浏览器中本段完全不生效，视觉不变。
+========================================= */
+
+.webclip-mode .search-box,
+.webclip-mode .bottom-nav,
+.webclip-mode .modal-backdrop,
+.webclip-mode .profile-stats-four {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.webclip-mode .search-box {
+  background: #f7fafb;
+}
+
+.webclip-mode .bottom-nav {
+  background: #fdfcf9;
+}
+
+/* 遮罩靠加深颜色保留层次，不需要毛玻璃 */
+.webclip-mode .modal-backdrop {
+  background:
+    rgba(75, 90, 94, 0.45);
+}
+
+.webclip-mode .profile-stats-four {
+  background: #fdfdf9;
+}
