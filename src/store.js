@@ -2,6 +2,57 @@ const DB_NAME = "fangfang-kitchen-diary";
 const DB_VERSION = 1;
 const STORE_NAME = "app";
 
+// localStorage 兜底键（IndexedDB 不可用时接管）
+const LS_KEY = DB_NAME;
+
+// IndexedDB 超时时间。
+// iOS Safari 在「无痕浏览 / 阻止跨站跟踪」下，open 请求可能既不 success
+// 也不 error，而是永久挂起 —— 这会让保存按钮看起来「点了没反应」。
+// 所以必须自带超时，超时后立刻降级到 localStorage。
+const DB_TIMEOUT = 3000;
+
+// 运行期标记：一旦 IndexedDB 被证明不可用，后续直接走兜底，避免每次保存都卡 3 秒
+let indexedDBAvailable = true;
+
+// iOS Safari 15.4 以下没有 structuredClone。
+// 缺失时会在保存的第一行就抛 ReferenceError，导致整个保存静默失败。
+if (typeof structuredClone !== "function") {
+  globalThis.structuredClone = value =>
+    JSON.parse(JSON.stringify(value));
+}
+
+function clone(value) {
+  return structuredClone(value);
+}
+
+// 给 IndexedDB 的异步操作套上超时，避免永久挂起
+function withTimeout(promise, ms, message) {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+
+    const timer = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      reject(new Error(message));
+    }, ms);
+
+    promise.then(
+      value => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        resolve(value);
+      },
+      error => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        reject(error);
+      }
+    );
+  });
+}
+
 const categories = [
   ["chicken", "鸡肉", "./assets/icons/chicken.png"],
   ["pork", "猪肉", "./assets/icons/pork.png"],
@@ -45,8 +96,22 @@ const defaultState = {
 };
 
 function openDB() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
+  if (!indexedDBAvailable) {
+    return Promise.reject(
+      new Error("IndexedDB 已判定为不可用")
+    );
+  }
+
+  const opening = new Promise((resolve, reject) => {
+    let request;
+
+    try {
+      request = indexedDB.open(DB_NAME, DB_VERSION);
+    } catch (error) {
+      // iOS Safari 无痕模式下，访问 indexedDB 本身就可能直接抛错
+      reject(error);
+      return;
+    }
 
     request.onupgradeneeded = () => {
       const db = request.result;
@@ -61,16 +126,46 @@ function openDB() {
     };
 
     request.onerror = () => {
-      reject(request.error);
+      reject(
+        request.error ||
+          new Error("IndexedDB 打开失败")
+      );
     };
+
+    request.onblocked = () => {
+      reject(
+        new Error("IndexedDB 被其他页面占用")
+      );
+    };
+  });
+
+  return withTimeout(
+    opening,
+    DB_TIMEOUT,
+    "IndexedDB 打开超时"
+  ).catch(error => {
+    indexedDBAvailable = false;
+    throw error;
   });
 }
 
+function readLocalStorage() {
+  try {
+    return JSON.parse(
+      localStorage.getItem(LS_KEY) || "null"
+    );
+  } catch {
+    return null;
+  }
+}
+
 async function readDB() {
+  let fromDB = null;
+
   try {
     const db = await openDB();
 
-    return await new Promise((resolve, reject) => {
+    fromDB = await new Promise((resolve, reject) => {
       const tx = db.transaction(
         STORE_NAME,
         "readonly"
@@ -89,21 +184,21 @@ async function readDB() {
       };
     });
   } catch {
-    try {
-      return JSON.parse(
-        localStorage.getItem(DB_NAME) || "null"
-      );
-    } catch {
-      return null;
-    }
+    fromDB = null;
   }
+
+  // IndexedDB 里没有数据时，回读 localStorage。
+  // 这样即使之前是靠兜底存下来的食谱，也不会凭空消失。
+  if (!fromDB) return readLocalStorage();
+
+  return fromDB;
 }
 
 
 async function writeDB(state) {
   const db = await openDB();
 
-  await new Promise((resolve, reject) => {
+  const writing = new Promise((resolve, reject) => {
     const tx = db.transaction(
       STORE_NAME,
       "readwrite"
@@ -137,6 +232,94 @@ async function writeDB(state) {
       reject(error);
     };
   });
+
+  return withTimeout(
+    writing,
+    DB_TIMEOUT,
+    "IndexedDB 写入超时"
+  ).catch(error => {
+    indexedDBAvailable = false;
+    throw error;
+  });
+}
+
+// 去掉照片的精简版本，用于空间不足时的最后抢救
+function slimState(state) {
+  return {
+    ...state,
+
+    recipes: (state.recipes || []).map(
+      recipe => ({
+        ...recipe,
+        photos: [],
+        cover: ""
+      })
+    ),
+
+    profile: {
+      ...state.profile,
+      avatar: ""
+    }
+  };
+}
+
+/**
+ * 分级持久化：
+ *   1. IndexedDB（首选）
+ *   2. localStorage 完整版
+ *   3. localStorage 精简版（丢照片，保住菜谱文字）
+ *   4. 全部失败 —— 仅存内存
+ *
+ * 永远不抛错，只返回写入结果，交给界面提示用户。
+ */
+async function persist(state) {
+  try {
+    await writeDB(state);
+
+    return {
+      ok: true,
+      channel: "indexeddb"
+    };
+  } catch (error) {
+    indexedDBAvailable = false;
+  }
+
+  try {
+    localStorage.setItem(
+      LS_KEY,
+      JSON.stringify(state)
+    );
+
+    return {
+      ok: true,
+      channel: "localstorage"
+    };
+  } catch {
+    // 多半是空间不足（照片太多）
+  }
+
+  try {
+    const slim = slimState(state);
+
+    localStorage.setItem(
+      LS_KEY,
+      JSON.stringify(slim)
+    );
+
+    return {
+      ok: true,
+      channel: "localstorage-slim",
+      slim: true
+    };
+  } catch {
+    // 彻底没救
+  }
+
+  return {
+    ok: false,
+    channel: "memory",
+    error: new Error("本机储存不可用")
+  };
 }
 
 
@@ -212,6 +395,18 @@ export function createStore() {
 
     ready,
 
+    // 最近一次写入本机的结果，界面用它决定提示文案
+    lastPersist: null,
+
+    // 供界面做存储体检
+    storageStatus() {
+      return {
+        indexedDB: indexedDBAvailable,
+        channel:
+          api.lastPersist?.channel || null
+      };
+    },
+
     getState() {
       return state;
     },
@@ -232,10 +427,15 @@ async setState(next) {
         : next
     );
 
-  // 先确认写入成功，再更新内存状态
-  await writeDB(nextState);
-
+  // 先更新内存与界面。
+  // 即使本机储存写不进去，这次会话里食谱也不会丢，
+  // 更不会出现「点了保存却毫无反应」的情况。
   state = nextState;
+
+  const result =
+    await persist(nextState);
+
+  api.lastPersist = result;
 
   listeners.forEach(
     fn => fn(state)

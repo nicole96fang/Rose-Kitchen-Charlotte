@@ -1573,11 +1573,38 @@ async function saveCurrentRecipe() {
     return;
   }
 
-  await store.upsertRecipe(
-    recipe
-  );
+  try {
+    await store.upsertRecipe(
+      recipe
+    );
+  } catch (error) {
+    console.error(error);
 
-  alert("食谱已经保存好了 ♡");
+    alert(
+      "保存失败了，请再点一次 ♡\n\n" +
+        "如果一直失败，可以先到「我的 → 数据备份」导出一份，避免内容丢失。"
+    );
+
+    return;
+  }
+
+  const persist =
+    store.lastPersist;
+
+  if (persist && !persist.ok) {
+    alert(
+      "食谱这次没能写进本机储存，只保存在当前页面里。\n\n" +
+        "请立刻到「我的 → 数据备份」导出一份，\n" +
+        "否则关闭页面后内容会丢失。"
+    );
+  } else if (persist && persist.slim) {
+    alert(
+      "食谱已经保存好了，但本机空间不足，照片没能一起存下来 ♡\n\n" +
+        "建议删掉几张照片后重新保存一次。"
+    );
+  } else {
+    alert("食谱已经保存好了 ♡");
+  }
 
   showCategory(
     recipe.categoryId
