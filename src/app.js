@@ -1,7 +1,7 @@
 import {
   createStore,
   blankRecipe
-} from "./store.js?v=8";
+} from "./store.js?v=9";
 
 const store = createStore();
 
@@ -2514,6 +2514,13 @@ function renderProfile(state) {
           所以这里改成「拷贝文字」的方式。
         </p>
 
+        <p class="backup-sheet-text faint">
+          💡 想连照片一起备份？
+          请用 Safari 打开同一个网址，
+          再从「我的」点这里的备份，
+          就能把照片存成文件 ♡
+        </p>
+
         <p
           class="backup-sheet-text"
           id="backup-meta"
@@ -2551,7 +2558,7 @@ function renderProfile(state) {
         </button>
 
         <p class="backup-version">
-          备份面板 v6
+          备份面板 v9
         </p>
 
       </div>

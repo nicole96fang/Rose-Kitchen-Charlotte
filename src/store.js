@@ -681,8 +681,11 @@ async setState(next) {
           .toISOString()
           .slice(0, 10)}.json`;
 
+      // 不带缩进：备份文件是给机器读的。
+      // 照片 base64 本身就有几 MB，带缩进会让体积和耗时翻倍，
+      // 分享面板更容易失败。
       const json =
-        JSON.stringify(state, null, 2);
+        JSON.stringify(state);
 
       // iOS（尤其是主屏书签容器）不具备网页下载能力。
       // 用 a.click() + download 会把整个容器切走甚至杀掉，
