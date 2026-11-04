@@ -1,0 +1,21 @@
+{
+  "id": "./",
+  "name": "芳芳的小厨房日记",
+  "short_name": "厨房日记",
+  "description": "My Kitchen Rose｜记录每一道喜欢的料理",
+  "lang": "zh-CN",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#dcecef",
+  "theme_color": "#dcecef",
+  "icons": [
+    {
+      "src": "./assets/avatar-profile.png",
+      "sizes": "360x360",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
